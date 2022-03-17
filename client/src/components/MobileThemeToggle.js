@@ -23,7 +23,7 @@ const MobileToggle = () => {
 return(
     <>
     <div className="flex justify-center items-center mt-4">
-    <div className="dark:bg-dark-mode dark:text-white rounded-full cursor-pointer shadow-lg rounded w-12 mx-auto p-2 bg-white border-primary dark:border-white border rounded-lg shadow-lg hover:bg-primary hover:text-white dark:hover:bg-white dark:hover:text-dark-mode" onClick={toggleTheme}>
+    <div className="dark:bg-dark-mode dark:text-white cursor-pointer shadow-lg  w-12 mx-auto p-2 bg-white border-primary dark:border-white border rounded-lg hover:bg-primary hover:text-white dark:hover:bg-white dark:hover:text-dark-mode" onClick={toggleTheme}>
             <BsSun className="mx-auto"/></div>
 </div>
 </>

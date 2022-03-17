@@ -6,7 +6,6 @@ import Login from './pages/login'
 import Register from "./pages/register"
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Calendar from './pages/calendar'
-import Footer from "./components/footer"
 
 function App() {
 	if (localStorage.theme === 'dark') {
@@ -33,9 +32,6 @@ function App() {
 
 				</Routes>
 			</Router>
-		
-
-		<Footer />
 		</div>
 		</>
 	)
