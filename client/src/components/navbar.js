@@ -54,9 +54,9 @@ function NavBar(){
 
             </div>
             <a
-              href="/"
+              href="/dashboard"
               className="inline-block w-full py-2 pl-14 text-m rounded hover:bg-secondary dark:hover:bg-gray-600 dark:text-white focus:outline-none hover:text-white focus:bg-secondary focus:text-white text-primary"
-            >Home</a
+            >Dashboard</a
             >
           </li>
           <li className="relative text-primary dark:text-white hover:text-white focus-within:text-white">
@@ -178,7 +178,7 @@ function NavBar(){
       <div className="px-6 pt-4">
         <ul className="flex flex-col space-y-5">
           
-        <a href='/'><li className="relative text-primary hover:text-white focus-within:text-white mx-auto rounded-lg p-2 hover:bg-secondary dark:text-white">
+        <a href='/dashboard'><li className="relative text-primary hover:text-white focus-within:text-white mx-auto rounded-lg p-2 hover:bg-secondary dark:text-white">
             <div
             className="flex items-center mx-auto pointer-events-none pl-1">
             <MdOutlineSpaceDashboard size={30}/>

@@ -8,13 +8,13 @@ const Login = () =>{
 
   return (
     <>
-    <div className="flex flex-row">
-      <div className="min-w-max min-h-full"><img className="min-w-max min-h-screen hidden lg:flex" src={loginIllustration}></img></div>
+    <div className="grid grid-cols-2">
+      <div className="min-w-max min-h-screen"><img className="min-w-max min-h-screen hidden lg:flex" src={loginIllustration}></img></div>
       <div className="text-white font-sans font-bold mx-auto container bg-white mx-auto text-center">
                 <div className="grid grid-rows-6 min-h-screen items-center mx-auto text-center">
                 
                     <div className="row-span-4 row-start-1 col-auto text-black mx-auto">
-                        <img className="w-52 mb-5 mt-20 ml-10" src={Logo}></img>
+                        <img className="w-32 mb-5 mt-10 ml-20 mx-auto" src={Logo}></img>
                         <div className="flex"><h1 className="text-2xl lg:text-3xl pr-2 pt-2">Welcome to</h1><h1 className="text-3xl lg:text-3xl bg-secondary p-2 rounded-lg text-white">Educam.</h1></div>
                         <h2 className="text-xl float-left text-gray-500">login to your account</h2>      
                         <div className="pt-10 pr-20 mx-auto">                        

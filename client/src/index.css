@@ -24,4 +24,10 @@ code {
     rounded-md shadow-md text-white bg-gray-900 text-xs
     font-bold transition-all duration-100 scale-0 origin-left;
   }
+
+   /* Hide scrollbar for Chrome, Safari and Opera */
+.noScollBar::-webkit-scrollbar {
+  display: none;
+}
+
 }

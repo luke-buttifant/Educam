@@ -6,16 +6,18 @@ import Login from './pages/login'
 import Register from "./pages/register"
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Calendar from './pages/calendar'
+import Dashboard from "./pages/dashboard"
+import Stream from "./pages/stream"
+
 
 function App() {
+
 	if (localStorage.theme === 'dark') {
 		document.documentElement.classList.add('dark')
-		document.documentElement.classList.remove('bg-background')
 		document.documentElement.classList.add("bg-dark-mode")
 	  } else {
 		document.documentElement.classList.remove('dark')
 		document.documentElement.classList.remove('bg-dark-mode')
-		document.documentElement.classList.add("bg-background")
 	  }
 
 	return (
@@ -25,6 +27,8 @@ function App() {
 			<Router>
 			<NavBar />
 				<Routes>
+				<Route path='/stream' element={<Stream />}/>
+					<Route path='/dashboard' element={<Dashboard />}/>
 					<Route path='/Profile' element={<Profile />}/>
 					<Route path='/login' element={<Login />}/>
 					<Route path='/register' element={<Register />}/>

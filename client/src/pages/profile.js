@@ -11,7 +11,7 @@ const Profile = () =>{
 	
   return (
       <>
-      <div className="container mb-10">
+      <div className="container mb-10 pt-10">
           <img className="w-52 mx-auto rounded-full" src={dp}></img>
         
     <h1 className="text-center text-4xl font-Sora dark:text-white"> Luke Buttifant</h1>

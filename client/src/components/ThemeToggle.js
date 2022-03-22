@@ -5,7 +5,6 @@ function toggleTheme(){
     if (localStorage.theme === 'dark'){
         localStorage.theme = 'light'
         document.documentElement.classList.remove('dark')
-        document.documentElement.classList.add('bg-background')
         document.documentElement.classList.remove("bg-dark-mode")
         lightModeToggle.classList.remove("ml-16")
 
@@ -14,7 +13,6 @@ function toggleTheme(){
         localStorage.theme = 'dark'
         document.documentElement.classList.add('dark')
         document.documentElement.classList.add('bg-dark-mode')
-        document.documentElement.classList.remove("bg-background")
         lightModeToggle.classList.add("ml-16")
     }
 }

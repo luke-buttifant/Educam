@@ -21,6 +21,7 @@
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",
+    "apexcharts": "^3.33.2",
     "cross-env": "^7.0.3",
     "react": "^17.0.2",
     "react-copy-to-clipboard": "^5.0.4",
@@ -33,6 +34,7 @@
     "simple-peer": "^9.11.0",
     "socket.io-client": "^4.4.1",
     "utils": "^0.3.1",
+    "victory": "^36.3.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
