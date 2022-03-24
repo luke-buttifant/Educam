@@ -26,7 +26,7 @@ function NavBar(){
   if (withouSidebarRoutes.some((item) => pathname.includes(item))) return null;
 
   function logOut(){
-    localStorage.removeItem("userInfo");
+    localStorage.removeItem("jwt");
     navigate('/login');
   }
   

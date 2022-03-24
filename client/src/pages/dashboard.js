@@ -35,7 +35,7 @@ const Dashboard = () =>{
 
 	useEffect(() =>{
 		  
-	  const userInfo = localStorage.getItem("userInfo");
+	  const userInfo = localStorage.getItem("jwt");
 	  if (!userInfo){
 		  navigate("/login")
 	  }

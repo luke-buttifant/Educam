@@ -1,6 +1,7 @@
 const User = require('../model/userModel')
 const asyncHandler = require('express-async-handler');
 const generateToken = require('../utils/generateJWT');
+const jsonwebtoken = require('jsonwebtoken');
 
 // Get users
 // Route: /api/users
@@ -25,12 +26,10 @@ const registerUser = asyncHandler(async (req, res) => {
     const user = await User.create({first_name, last_name, email, password, gender, dob, school});
 
     if(user){
-        res.status(201).json({
-            first_name:user.first_name,
-            last_name:user.last_name,
-            email:user.email,
-            jwt_token:generateToken(user._id),
-        })}
+        const token = generateToken(user._id);
+        res.json({auth: true, token: token, result: user})
+    }
+        
         else{
             res.status(400)
             throw new Error("Error Occured!")
@@ -43,10 +42,11 @@ const authUser = asyncHandler(async (req, res) => {
     
     if(user && (await user.matchPassword(password))){
         const token = generateToken(user._id);
-        res.header('auth-token', token).send(token)
+        res.json({auth: true, token: token, result: user})
     }
     else{
         res.status(400)
+        res.json({auth: false})
         throw new Error("Invalid email or password!")
     }
 
@@ -63,5 +63,16 @@ const specificUser = asyncHandler(async (req, res) => {
     }
 );
 
-module.exports = { getUsers, registerUser, authUser, specificUser}
+const currentUserInfo = asyncHandler(async (req, res) => {
+    try{
+        console.log(req.userId)
+        const user = await User.findById(req.userId);
+        console.log(user);
+        res.send(user)
+    }catch(err){
+        console.log(err);
+    }
+})
+
+module.exports = { getUsers, registerUser, authUser, specificUser, currentUserInfo}
 

@@ -27,10 +27,15 @@ const userSchema = mongoose.Schema(
     },
     is_teacher: {
         type: Boolean,
+        default: false,
     },
-    school: {
+    is_teacher: {
+      type: Boolean,
+      default: false,
+  },
+    pic: {
       type: String,
-      required: [true, 'Please select a school'],
+      default: "https://www.perfecttutor.in/images/student2.png"
   },
     dob: {
       type: String,
@@ -39,7 +44,6 @@ const userSchema = mongoose.Schema(
   },
   {
     timestamps: true,
-    
   }
 )
 

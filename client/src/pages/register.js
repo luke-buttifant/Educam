@@ -38,7 +38,7 @@ const Register = () =>{
 
     useEffect(() =>{
           
-      const userInfo = localStorage.getItem("userInfo");
+      const userInfo = localStorage.getItem("jwt");
       if (userInfo){
           navigate("/")
       }
@@ -54,7 +54,7 @@ const Register = () =>{
         }
         else{
             setMessage(null)
-            try{
+            // try{
                 const config = {
                     headers: {
                         "Content-type": "application/json",
@@ -65,15 +65,21 @@ const Register = () =>{
                 const {data} = await axios.post(
                     "/api/users",
                     {first_name, last_name, email, password, gender, dob, school}
-                )
+                ).then((response) => {
+                    localStorage.setItem('jwt', response.data.token);
+                    navigate("/")
+                    setLoading(false)
+                })
                 
                 setLoading(false)
-                localStorage.setItem("userInfo", JSON.stringify(data));
                 navigate('/')
-            }catch (error){
-                setError(error.response.data.message)
-                setLoading(false)
-            }
+                console.log("succesfull registration")
+            // }
+            // catch (error){
+            //     // setError(error.response.data.message)
+            //     setLoading(false)
+            //     console.log("failed")
+            // }
 
         }    
     }

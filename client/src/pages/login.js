@@ -18,7 +18,7 @@ const Login = () =>{
 
 	useEffect(() =>{
 		  
-	  const userInfo = localStorage.getItem("userInfo");
+	  const userInfo = localStorage.getItem("jwt");
 	  if (userInfo){
 		  navigate("/")
 	  }
@@ -40,12 +40,14 @@ const Login = () =>{
             setLoading(true)
             const {data} = await axios.post('api/users/login',{
                 email, password
-            }, config)
+            }, config).then((response) => {
+                localStorage.setItem('jwt', response.data.token);
+                navigate("/")
+                setLoading(false)
+            })
 
             console.log(data)
-            localStorage.setItem('userInfo', JSON.stringify(data));
-            navigate("/")
-            setLoading(false)
+
         }catch(error){
             setError(error.response.data.message);
             setLoading(false)

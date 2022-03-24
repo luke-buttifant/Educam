@@ -6,33 +6,38 @@ import {RiLockPasswordLine} from 'react-icons/ri'
 import {FiSettings, FiLogOut} from 'react-icons/fi'
 import {ImBin} from 'react-icons/im'
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+
 
 const Profile = () =>{
   useEffect(() => {
-    fetchItems();
+    userAuthenticated();
   }, []);
 
-  const [items, setItems] = useState([]);
-  const userInfo = JSON.parse(localStorage.getItem("userInfo"))
+const [data, setData] = useState({})
 
-  const fetchItems = async () =>{
-    const data = await fetch(`/api/users/${userInfo._id}`);
-    const items = await data.json();
-    setItems(items)
+  const userAuthenticated = async () => {
+    await axios.get("/api/users/currentUser", {headers: {
+      "x-access-token": localStorage.getItem("jwt")
+    }}).then((response) => {
+      setData(response.data)
+     
+    })
+  }
+
+  const handleFileUpload = event => {
+    console.log(event.target.files[0].name);
   };
 
+  const inputFile = useRef(null)
 
-	
   return (
       <>
-      {
-        items.map(item => {
           <div className="container mb-10 pt-10">
-          <img className="w-52 mx-auto rounded-full" src={dp}></img>
+          <img className="w-52 mx-auto rounded-full hover:opacity-50 cursor-pointer" onClick={() => this.refs.fileInput.click()} ref={inputFile} src={data.pic}></img>
         
-    <h1 className="text-center text-4xl font-Sora dark:text-white">{item.first_name} {item.last_name}</h1>
-    <h2 className="text-center text-2xl font-Sora dark:text-white mb-2">{userInfo.school}</h2>
+    <h1 className="text-center text-4xl font-Sora dark:text-white">{data.first_name} {data.last_name}</h1>
+    <h2 className="text-center text-2xl font-Sora dark:text-white mb-2">{data.school}</h2>
     <hr className="w-96 mx-auto mb-8 dark:opacity-25"></hr>
     <div className="flex flex-row bg-white dark:bg-dark-mode-secondary rounded-lg shadow-lg mx-auto max-w-[70%]">
       <div className="container">
@@ -40,30 +45,32 @@ const Profile = () =>{
           <a href="/profile"><div className="text-2xl text-primary hover:bg-gray-200 p-2 rounded-lg"><div className="flex dark:text-white dark:hover:text-dark-mode"><AiOutlineProfile className="mr-2 mt-1 "/> Profile</div></div></a>
           <a href="/profile"><div className="text-2xl text-primary hover:bg-gray-200 p-2 rounded-lg"><div className="flex dark:text-white dark:hover:text-dark-mode"><RiLockPasswordLine className="mr-2 mt-1"/> Password</div></div></a>
           <a href="/profile"><div className="text-2xl text-primary hover:bg-gray-200 p-2 rounded-lg"><div className="flex dark:text-white dark:hover:text-dark-mode"><IoSchoolOutline className="mr-2 mt-1"/> School</div></div></a>
+          <input type="file"></input>
         </div>
         <hr className="dark:opacity-25"></hr>
       <div className="grid grid-rows-3 mt-4 mr-10 ml-10">
       <a href="/profile"><div className="text-xl text-primary hover:bg-gray-200 p-2 rounded-lg"><div className="flex dark:text-white dark:hover:text-dark-mode"><FiSettings className="mr-2 mt-1"/> Settings</div></div></a>
           <a href="/profile"><div className="text-xl text-primary hover:bg-gray-200 p-2 rounded-lg"><div className="flex dark:text-white dark:hover:text-dark-mode"><FiLogOut className="mr-2 mt-1"/> Sign Out</div></div></a>
           <a href="/profile"><div className="text-xl text-primary p-2 rounded-lg hover:bg-red-500"><div className="flex dark:text-white dark:hover:text-white "><ImBin className="mr-2 mt-1"/> Delete Account</div></div></a>
+          
       </div>
       </div>
     <div className="container">
       <h1 className="text-center text-3xl text-gray-600 dark:text-white font-bold m-5">Edit Profile</h1>
       <div className="grid grid-rows-9 gap-2">
       <div><label className="text-gray-500 dark:text-white" htmlFor="name">Username</label></div>
-      <div><input className="min-w-full dark:bg-dark-mode-secondary" name="name" type="text" placeholder="Luke Buttifant"/></div>
+      <div><input className="min-w-full dark:bg-dark-mode-secondary" name="name" type="text" placeholder={data.first_name + " " + data.last_name}/></div>
       <hr className="dark:opacity-25"></hr>
       <div><label className="text-gray-500 dark:text-white" htmlFor="email">Email Address</label></div>
-      <div><input className="min-w-full dark:bg-dark-mode-secondary" name="email" type="text" placeholder="Luke123@gmail.com"/></div>
+      <div><input className="min-w-full dark:bg-dark-mode-secondary" name="email" type="text" placeholder={data.email}/></div>
       <hr className="dark:opacity-25"></hr>
       <div><label className="text-gray-500 dark:text-white" htmlFor="gender">Gender</label></div>
-      <div><input className="min-w-full dark:bg-dark-mode-secondary" name="gender" type="text" placeholder="Male"/></div>
+      <div><input className="min-w-full dark:bg-dark-mode-secondary" name="gender" type="text" placeholder={data.gender}/></div>
       <hr className="dark:opacity-25"></hr>
       <div><label className="text-gray-500 dark:text-white" htmlFor="dob">D.O.B</label></div>
-      <div><input className="min-w-full dark:bg-dark-mode-secondary" name="dob" type="text" placeholder="06.07.2000"/></div>
+      <div><input className="min-w-full dark:bg-dark-mode-secondary" name="dob" type="text" placeholder={data.dob}/></div>
       <hr className="dark:opacity-25"></hr>
-      <div className="mx-auto"><button className="bg-secondary dark:bg-green-200 p-4 text-3xl rounded-lg w-96 m-5 text-white dark:text-black font-bold" type="button">Update</button></div>
+      <div className="mx-auto"><button className="bg-secondary dark:bg-green-200 p-4 text-3xl rounded-lg w-96 m-5 text-white dark:text-black font-bold dark:hover:bg-primary dark:hover:text-white" type="button">Update</button></div>
       </div>
 
      
@@ -71,9 +78,6 @@ const Profile = () =>{
     </div>
 
       </div>
-        })
-      }
-      
     
     </>
   );
