@@ -1,19 +1,9 @@
 import { Scheduler } from "@aldabil/react-scheduler";
-import {  ThemeProvider } from '@material-ui/styles'
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { common, green, purple, red } from '@mui/material/colors';
+import { rootShouldForwardProp } from "@mui/material/styles/styled";
 
-import { createTheme } from '@mui/material/styles';
-import { green, purple } from '@mui/material/colors';
 
-const theme = createTheme({
-  palette: {
-    textPrimary: {
-      main: green[500],
-    },
-    secondary: {
-      main: green[500],
-    },
-  },
-});
 
 // import { EVENTS } from "./events";
 
@@ -75,6 +65,27 @@ const theme = createTheme({
 
 
 const Calendar = () =>{
+  var root = document.getElementById('rootChild');
+  // if(root.classList.contains('bg-dark-mode')){
+  //   var MUIThemeText = '#ffffff'
+  // }
+  // else{
+  //   var MUIThemeText = '#000000'
+  // }
+
+  const theme = createTheme({
+    palette: {
+      primary: {
+        main: "#8472FC",
+      },
+      secondary: {
+        main: "#41416E",
+      },
+      text: {
+        primary: "#8472FC",
+        },
+    },
+  });
     return (
         <>
         

@@ -10,7 +10,9 @@ import Dashboard from "./pages/dashboard"
 import Stream from "./pages/stream"
 
 
+
 function App() {
+
 
 	if (localStorage.theme === 'dark') {
 		document.documentElement.classList.add('dark')
@@ -22,11 +24,12 @@ function App() {
 
 	return (
 		<>
-		<div className="dark:bg-dark-mode bg-none min-h-screen bg-no-repeat">
+		<div id="rootChild" className="dark:bg-dark-mode bg-none min-h-screen bg-no-repeat">
 		
 			<Router>
 			<NavBar />
 				<Routes>
+				<Route path='/' element={<Dashboard />}/>
 				<Route path='/stream' element={<Stream />}/>
 					<Route path='/dashboard' element={<Dashboard />}/>
 					<Route path='/Profile' element={<Profile />}/>

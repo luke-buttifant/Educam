@@ -9,19 +9,26 @@ import {React} from 'react'
 import {useLocation } from "react-router-dom";
 import Toggle from './ThemeToggle'
 import MobileToggle from './MobileThemeToggle'
+import {useNavigate} from 'react-router-dom'
 
 
 function NavBar(){
   const withouSidebarRoutes = ["/login", "/register"];
+  let navigate = useNavigate()
 
   function toggleNav(){
     document.getElementById("topNav").classList.toggle("hidden");
     document.getElementById("bottomNav").classList.toggle("hidden");
   }
-
+  
 
   const {pathname} = useLocation();
   if (withouSidebarRoutes.some((item) => pathname.includes(item))) return null;
+
+  function logOut(){
+    localStorage.removeItem("userInfo");
+    navigate('/login');
+  }
   
   return(
   <>
@@ -133,18 +140,12 @@ function NavBar(){
             >Settings</a
             >
           </li>
-          <li className="relative text-primary dark:text-white hover:text-white focus-within:text-white">
+          <button type='button' onClick={logOut}><li className="relative text-primary dark:text-white hover:text-white focus-within:text-white">
             <div
-              className="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none mt-2"
-            >
-              <GoSignOut size={30} className="ml-2"/>
-            </div>
-            <a
-              href="#"
-              className="inline-block w-full py-2 pl-14 text-m rounded hover:bg-secondary focus:outline-none focus:ring-1 focus:ring-gray-500 focus:bg-secondary focus:text-white"
-            >Sign Out</a
-            >
-          </li>
+              className="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none mt-2">
+              <GoSignOut size={30} className="ml-2"/></div>
+            <div className="inline-block w-full py-2 pl-14 text-m rounded hover:bg-secondary focus:outline-none focus:ring-1 focus:ring-gray-500 focus:bg-secondary focus:text-white">Sign Out</div>
+          </li></button>
         </ul>
         {/* DARK MODE TOGGLE */}
         <Toggle />
@@ -218,19 +219,19 @@ function NavBar(){
 
         <ul className="space-y-2">
 
-          <li className="relative text-primary hover:text-white focus-within:text-white mx-auto rounded-lg p-4 hover:bg-secondary dark:text-white">
+          <a href='/test'><li className="relative text-primary hover:text-white focus-within:text-white mx-auto rounded-lg p-4 hover:bg-secondary dark:text-white">
             <div
               className="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none">
               < AiOutlineSetting size={25}/>
             </div>
-          </li>
+          </li></a>
 
-          <a href='/register'><li className="relative text-primary hover:text-white focus-within:text-white mx-auto rounded-lg p-4 hover:bg-secondary dark:text-white mt-4">
+          <button type='button' onClick={logOut}><li className="relative text-primary hover:text-white focus-within:text-white mx-auto rounded-lg p-4 hover:bg-secondary dark:text-white mt-4">
             <div
               className="absolute inset-y-0 left-0 flex items-center pl-3 mx-auto pointer-events-none">
               <GoSignOut size={25}/>
             </div>
-          </li></a>
+          </li></button>
 
         </ul>
         <MobileToggle />

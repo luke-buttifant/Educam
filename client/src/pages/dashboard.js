@@ -1,24 +1,87 @@
-import ApexCharts from 'apexcharts'
-import { useEffect } from 'react'
-import { VictoryPie, VictoryLabel, VictoryChart, VictoryLine } from 'victory';
-import { CircularProgress } from '@mui/material';
+import { VictoryPie, VictoryLabel} from 'victory';
 import '../components/componentCss/progressCircle.css'
-import {AiFillVideoCamera, AiOutlineSchedule} from 'react-icons/ai'
+import {AiOutlineSchedule} from 'react-icons/ai'
 import {BiVideoPlus} from 'react-icons/bi'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
+import { CircularProgressbar,  buildStyles} from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
+import { useNavigate } from "react-router-dom"
+import {useEffect} from 'react'
+
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
 
 const Dashboard = () =>{  
+	let navigate = useNavigate()
+
+	useEffect(() =>{
+		  
+	  const userInfo = localStorage.getItem("userInfo");
+	  if (!userInfo){
+		  navigate("/login")
+	  }
+  }, [navigate])
+
+  const { faker } = require('@faker-js/faker');
+
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: 'Classroom Attendance',
+      }
+    },
+  };
+
+  const labels = ['Start', '', '', '', '', '', 'End'];
+
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: 'Attendance',
+        data: [0, 10, 15, 18, 20, 15, 8],
+        borderColor: '#8472FC',
+        backgroundColor: '#000000',
+      }
+    ],
+  };
+
+  const percentage = 66;
 
     return (
         <>
+
         <div className='text-3xl mb-10 pt-10 font-bold'>Teacher Dashboard</div>
-        <div className='container'>
-        <div className='grid grid-cols-2 lg:gap-20 gap-4 lg:px-20 px-0'>
-            <div className=" mx-24 lg:mx-48">
+        <div className='grid grid-cols-2 gap-10 m-10'>
+            <div className="">
             <div className='m-0 mx-auto'>
         <div className=' bg-white rounded-lg dark:bg-dark-mode-secondary shadow-lg'>
-          
-          <div className='flex flex-col'>
-        <svg viewBox="-50 -50 500 450">
+        
+        <svg className='max-h-64 mx-auto' viewBox="-50 -50 500 500">
         <VictoryPie
         animate={{
           duration: 2000
@@ -47,36 +110,13 @@ const Dashboard = () =>{
           <li className='text-red-500'>Failed to Attend</li>
         </div>
         </div>
-        </div>
 
         </div>
             </div>
-        <div className=' rounded-lg dark:bg-dark-mode-secondary shadow-lg'>
-          <div className=' bg-white max-h-max'>
-          <svg viewBox='0 0 510 300'>
-        <VictoryChart
-        standalone={false}
-        width={300}
-        height={300}>
-  <VictoryLine
-   standalone={false}
-  animate={{
-    duration: 2000,
-    onLoad: { duration: 1000 }
-  }}
-  interpolation="natural"
-style={{ data: { stroke: "blue", strokeWidth: 1, strokeLinecap: "round"} }}
-    data={[
-      { x: 0, y: 0 },
-      { x: 15, y: 8 },
-      { x: 30, y: 8 },
-      { x: 45, y: 10 },
-      { x: 60, y: 6 }
-    ]}
-  />
-</VictoryChart>
-</svg>
-</div>
+        <div className='rounded-lg dark:bg-dark-mode-secondary shadow-lg max-h-96\ bg-white'>
+        <Line className='max-h-full' options={options} data={data} />
+
+
         </div>
 
 
@@ -91,11 +131,15 @@ style={{ data: { stroke: "blue", strokeWidth: 1, strokeLinecap: "round"} }}
           
           <div className='grid grid-cols-3'>
         <div className='grid col-span-2 grid-rows-2 p-10 rounded-tl-lg rounded-bl-lg'>
-          <h1 className='font-bold'>Challenge</h1>
-          <h2>Get 100% of class to actively attend.</h2>
+          <h1 className='font-bold dark:text-white'>Challenge</h1>
+          <h2 className='dark:text-white'>Get 100% of class to actively attend.</h2>
         </div>
-        <div className='p-5 float-right'>
-        <CircularProgress className='float-right' variant="determinate" value={100} size={100} color={'primary'} />
+        <div className='max-h-max w-24 mx-auto mt-4'>
+        <CircularProgressbar value={percentage} text={`${percentage}%`} styles={buildStyles({
+              pathColor: `#8472FC`,
+              textColor: '#8472FC',
+              backgroundColor: '#8472FC',
+        })}/>
       </div>
         </div>
         </div>
@@ -110,19 +154,18 @@ style={{ data: { stroke: "blue", strokeWidth: 1, strokeLinecap: "round"} }}
                 <div className='grid grid-cols-1 lg:gap-20 gap-4 lg:px-20 px-0 mt-10'>
             <div className='m-0 mx-auto'>
           
-          <div className='grid grid-cols-2 gap-2 mb-10 text-center bg-white px-10 py-4 rounded-lg'>
+          <div className='grid grid-cols-2 gap-2 mb-10 text-center bg-white dark:bg-dark-mode-secondary px-10 py-4 rounded-lg'>
           <div className='flex flex-col'><a href='/stream'><div className='bg-secondary rounded-lg shadow-lg flex flex-col'><button className='p-5 text-center text-white' type='button'><BiVideoPlus size={100}/></button></div></a>
-            <div className='text-xl font-bold'>New Classroom</div></div>
+            <div className='text-xl font-bold dark:text-white'>New Classroom</div></div>
             <div className='flex flex-col'>
           <div className='bg-dark-mode rounded-lg shadow-lg'><button className='p-5 mx-auto text-center text-white' type='button'><AiOutlineSchedule size={100} /></button></div>
-          <div className='text-xl font-bold'>Schedule</div></div>
+          <div className='text-xl font-bold dark:text-white'>Schedule</div></div>
         </div>
 
         </div>
 
 
 
-        </div>
         </div>
 
         </>

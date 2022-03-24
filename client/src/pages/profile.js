@@ -5,17 +5,34 @@ import {IoSchoolOutline} from 'react-icons/io5'
 import {RiLockPasswordLine} from 'react-icons/ri'
 import {FiSettings, FiLogOut} from 'react-icons/fi'
 import {ImBin} from 'react-icons/im'
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+
 const Profile = () =>{
- 
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+  const [items, setItems] = useState([]);
+  const userInfo = JSON.parse(localStorage.getItem("userInfo"))
+
+  const fetchItems = async () =>{
+    const data = await fetch(`/api/users/${userInfo._id}`);
+    const items = await data.json();
+    setItems(items)
+  };
+
 
 	
   return (
       <>
-      <div className="container mb-10 pt-10">
+      {
+        items.map(item => {
+          <div className="container mb-10 pt-10">
           <img className="w-52 mx-auto rounded-full" src={dp}></img>
         
-    <h1 className="text-center text-4xl font-Sora dark:text-white"> Luke Buttifant</h1>
-    <h2 className="text-center text-2xl font-Sora dark:text-white mb-2">Solent University</h2>
+    <h1 className="text-center text-4xl font-Sora dark:text-white">{item.first_name} {item.last_name}</h1>
+    <h2 className="text-center text-2xl font-Sora dark:text-white mb-2">{userInfo.school}</h2>
     <hr className="w-96 mx-auto mb-8 dark:opacity-25"></hr>
     <div className="flex flex-row bg-white dark:bg-dark-mode-secondary rounded-lg shadow-lg mx-auto max-w-[70%]">
       <div className="container">
@@ -28,7 +45,7 @@ const Profile = () =>{
       <div className="grid grid-rows-3 mt-4 mr-10 ml-10">
       <a href="/profile"><div className="text-xl text-primary hover:bg-gray-200 p-2 rounded-lg"><div className="flex dark:text-white dark:hover:text-dark-mode"><FiSettings className="mr-2 mt-1"/> Settings</div></div></a>
           <a href="/profile"><div className="text-xl text-primary hover:bg-gray-200 p-2 rounded-lg"><div className="flex dark:text-white dark:hover:text-dark-mode"><FiLogOut className="mr-2 mt-1"/> Sign Out</div></div></a>
-          <a href="/profile"><div className="text-xl text-primary hover:bg-gray-200 p-2 rounded-lg"><div className="flex dark:text-white dark:hover:text-dark-mode"><ImBin className="mr-2 mt-1"/> Delete Account</div></div></a>
+          <a href="/profile"><div className="text-xl text-primary p-2 rounded-lg hover:bg-red-500"><div className="flex dark:text-white dark:hover:text-white "><ImBin className="mr-2 mt-1"/> Delete Account</div></div></a>
       </div>
       </div>
     <div className="container">
@@ -54,6 +71,9 @@ const Profile = () =>{
     </div>
 
       </div>
+        })
+      }
+      
     
     </>
   );
