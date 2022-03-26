@@ -1,8 +1,8 @@
 import { Scheduler } from "@aldabil/react-scheduler";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { common, green, purple, red } from '@mui/material/colors';
-import { rootShouldForwardProp } from "@mui/material/styles/styled";
-
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 
 // import { EVENTS } from "./events";
@@ -65,6 +65,27 @@ import { rootShouldForwardProp } from "@mui/material/styles/styled";
 
 
 const Calendar = () =>{
+  let navigate = useNavigate()
+
+  useEffect(() => {
+      userAuthenticated();
+    }, [navigate]);
+   
+
+const [data, setData] = useState({})
+
+  const userAuthenticated = async () => {
+      var user = await axios.get("/api/users/currentUser", {headers: {
+      "x-access-token": localStorage.getItem("jwt")
+    }}).then((response) => {
+      setData(response.data)
+      if(response.data.message == "authentication failed"){
+        localStorage.removeItem("jwt");
+        navigate("/login")
+      }
+    })
+  }
+
   var root = document.getElementById('rootChild');
   // if(root.classList.contains('bg-dark-mode')){
   //   var MUIThemeText = '#ffffff'

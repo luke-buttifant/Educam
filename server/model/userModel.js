@@ -29,9 +29,8 @@ const userSchema = mongoose.Schema(
         type: Boolean,
         default: false,
     },
-    is_teacher: {
-      type: Boolean,
-      default: false,
+    school: {
+      type: String,
   },
     pic: {
       type: String,

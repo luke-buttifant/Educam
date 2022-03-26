@@ -1,4 +1,4 @@
-import {React, useState} from "react"
+import {React, useState, useEffect} from "react"
 import "../App.css"
 import VideoFeed from "../components/getVideoFeed";
 import {BsFillPlusCircleFill, BsThreeDots} from 'react-icons/bs'
@@ -7,8 +7,30 @@ import {FiPhone} from 'react-icons/fi'
 import {AiOutlineAudioMuted, AiOutlineUserAdd} from 'react-icons/ai'
 import dp from '../images/dp.png'
 import ChatMessage from "../components/chat.js";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Stream = () =>{
+  let navigate = useNavigate()
+
+  useEffect(() => {
+      userAuthenticated();
+    }, [navigate]);
+   
+
+const [data, setData] = useState({})
+
+  const userAuthenticated = async () => {
+      var user = await axios.get("/api/users/currentUser", {headers: {
+      "x-access-token": localStorage.getItem("jwt")
+    }}).then((response) => {
+      setData(response.data)
+      if(response.data.message == "authentication failed"){
+        localStorage.removeItem("jwt");
+        navigate("/login")
+      }
+    })
+  }
   return (
       <>
       <div className="grid grid-cols-3">

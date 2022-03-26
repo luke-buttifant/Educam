@@ -16,7 +16,8 @@ import { Line } from 'react-chartjs-2';
 import { CircularProgressbar,  buildStyles} from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { useNavigate } from "react-router-dom"
-import {useEffect} from 'react'
+import {useEffect, useState} from 'react'
+import axios from 'axios'
 
 
 ChartJS.register(
@@ -30,16 +31,27 @@ ChartJS.register(
 );
 
 
-const Dashboard = () =>{  
-	let navigate = useNavigate()
+const StudentDashboard = () =>{  
+  let navigate = useNavigate()
 
-	useEffect(() =>{
-		  
-	  const userInfo = localStorage.getItem("jwt");
-	  if (!userInfo){
-		  navigate("/login")
-	  }
-  }, [navigate])
+  useEffect(() => {
+      userAuthenticated();
+    }, [navigate]);
+   
+
+const [data, setData] = useState({})
+
+  const userAuthenticated = async () => {
+      var user = await axios.get("/api/users/currentUser", {headers: {
+      "x-access-token": localStorage.getItem("jwt")
+    }}).then((response) => {
+      setData(response.data)
+      if(response.data.message == "authentication failed"){
+        localStorage.removeItem("jwt");
+        navigate("/login")
+      }
+    })
+  }
 
   const { faker } = require('@faker-js/faker');
 
@@ -58,7 +70,7 @@ const Dashboard = () =>{
 
   const labels = ['Start', '', '', '', '', '', 'End'];
 
-  const data = {
+  const attendanceData = {
     labels,
     datasets: [
       {
@@ -75,7 +87,7 @@ const Dashboard = () =>{
     return (
         <>
 
-        <div className='text-3xl mb-10 pt-10 font-bold'>Teacher Dashboard</div>
+        <div className='text-3xl mb-10 pt-10 font-bold'>Student Dashboard</div>
         <div className='grid grid-cols-2 gap-10 m-10'>
             <div className="">
             <div className='m-0 mx-auto'>
@@ -114,7 +126,7 @@ const Dashboard = () =>{
         </div>
             </div>
         <div className='rounded-lg dark:bg-dark-mode-secondary shadow-lg max-h-96\ bg-white'>
-        <Line className='max-h-full' options={options} data={data} />
+        <Line className='max-h-full' options={options} data={attendanceData} />
 
 
         </div>
@@ -171,4 +183,4 @@ const Dashboard = () =>{
         </>
     );
   }
-  export default Dashboard;
+  export default StudentDashboard;

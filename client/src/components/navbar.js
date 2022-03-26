@@ -5,16 +5,32 @@ import { AiOutlineInfoCircle, AiOutlineSetting } from 'react-icons/ai'
 import { GoSignOut } from 'react-icons/go'
 import Logo from '../images/Logo.png'
 import dp from '../images/dp.png'
-import {React} from 'react'
+import {React, useState, useEffect} from 'react'
 import {useLocation } from "react-router-dom";
 import Toggle from './ThemeToggle'
 import MobileToggle from './MobileThemeToggle'
 import {useNavigate} from 'react-router-dom'
+import axios from 'axios'
 
 
 function NavBar(){
   const withouSidebarRoutes = ["/login", "/register"];
+
   let navigate = useNavigate()
+  
+  useEffect(async () => {
+    await userAuthenticated();
+  }, []);
+
+const [data, setData] = useState({})
+
+  const userAuthenticated = async () => {
+    await axios.get("/api/users/currentUser", {headers: {
+      "x-access-token": localStorage.getItem("jwt")
+    }}).then((response) => {
+      setData(response.data)
+    })
+  }
 
   function toggleNav(){
     document.getElementById("topNav").classList.toggle("hidden");
@@ -61,7 +77,7 @@ function NavBar(){
 
             </div>
             <a
-              href="/dashboard"
+              href="/permissions"
               className="inline-block w-full py-2 pl-14 text-m rounded hover:bg-secondary dark:hover:bg-gray-600 dark:text-white focus:outline-none hover:text-white focus:bg-secondary focus:text-white text-primary"
             >Dashboard</a
             >
@@ -114,14 +130,14 @@ function NavBar(){
             >
               <img
                 className="rounded-full"
-                src={dp}
+                src={data.pic}
                 alt=""
               />
             </div>
             <div className="flex flex-col pl-3">
-              <div className="text-sm text-gray-50">Luke Buttifant</div>
+              <div className="text-sm text-gray-50">{data.first_name}</div>
               <span className="text-sm text-gray-200 font-light tracking-tight">
-                Southampton Solent University
+               {data.school}
                </span>
             </div>
           </div>
@@ -179,7 +195,7 @@ function NavBar(){
       <div className="px-6 pt-4">
         <ul className="flex flex-col space-y-5">
           
-        <a href='/dashboard'><li className="relative text-primary hover:text-white focus-within:text-white mx-auto rounded-lg p-2 hover:bg-secondary dark:text-white">
+        <a href='/permissions'><li className="relative text-primary hover:text-white focus-within:text-white mx-auto rounded-lg p-2 hover:bg-secondary dark:text-white">
             <div
             className="flex items-center mx-auto pointer-events-none pl-1">
             <MdOutlineSpaceDashboard size={30}/>

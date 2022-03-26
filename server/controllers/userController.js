@@ -1,7 +1,9 @@
 const User = require('../model/userModel')
 const asyncHandler = require('express-async-handler');
 const generateToken = require('../utils/generateJWT');
-const jsonwebtoken = require('jsonwebtoken');
+require("dotenv").config();
+const multer = require('multer')
+const {normalize} = require('path')
 
 // Get users
 // Route: /api/users
@@ -45,8 +47,6 @@ const authUser = asyncHandler(async (req, res) => {
         res.json({auth: true, token: token, result: user})
     }
     else{
-        res.status(400)
-        res.json({auth: false})
         throw new Error("Invalid email or password!")
     }
 
@@ -74,5 +74,83 @@ const currentUserInfo = asyncHandler(async (req, res) => {
     }
 })
 
-module.exports = { getUsers, registerUser, authUser, specificUser, currentUserInfo}
+const multerConfig = multer.diskStorage({
+    destination: (req, file, callback) =>{
+         callback(null, normalize('./client/public/images'));
+
+    },
+    filename: (req, file, callback) => {
+        const ext = file.mimetype.split('/')[1];
+        callback(null, `image-${Date.now()}.${ext}`);
+    }
+});
+
+const isImage = (req, file, callback) =>{
+    if(file.mimetype.startsWith('image')){
+        callback(null, true);
+    }
+    else{
+        callback(new Error('Only images are allowed...'));
+    }
+}
+
+
+const upload = multer({
+    storage: multerConfig,
+    fileFilter: isImage,
+});
+
+const uploadImage = upload.single('photo')
+
+const uploadReq = async (req, res) => {
+    console.log(req.file);
+    try{
+        var filename = req.file.filename;
+        const _id = req.body._id;
+        const first_name = req.body.first_name
+        const last_name = req.body.last_name;
+        const gender = req.body.gender
+        const dob = req.body.dob
+        const email = req.body.email
+
+        await User.findByIdAndUpdate(_id,{
+                pic: `images/${filename}`,
+                first_name: first_name,
+                last_name: last_name,
+                gender: gender, 
+                email: email,
+                dob: dob, 
+
+        }),
+        res.status(200).json({
+            success: 'success',
+            filename: filename
+        })
+    }
+    catch{
+        const _id = req.body._id;
+        const first_name = req.body.first_name
+        const last_name = req.body.last_name;
+        const gender = req.body.gender
+        const dob = req.body.dob
+        const email = req.body.email
+
+        await User.findByIdAndUpdate(_id,{
+            first_name: first_name,
+            last_name: last_name,
+            gender: gender, 
+            email: email,
+            dob: dob, 
+
+    }),
+    res.status(200).json({
+        success: 'success'
+    })
+    }
+
+    
+}
+
+
+module.exports = { getUsers, registerUser, authUser, specificUser, currentUserInfo, uploadImage, uploadReq}
 

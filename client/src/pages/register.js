@@ -1,8 +1,6 @@
 import {React, useState} from "react"
 import "../App.css"
 import loginIllustration from "../images/loginIllustration.png"
-import Logo from '../images/Logo.png'
-import illustration from '../images/loginIllustration.png'
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import schools from "../Objects/schools"

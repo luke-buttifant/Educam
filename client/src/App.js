@@ -6,8 +6,10 @@ import Login from './pages/login'
 import Register from "./pages/register"
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Calendar from './pages/calendar'
-import Dashboard from "./pages/dashboard"
 import Stream from "./pages/stream"
+import Permissions from './pages/permissionBarrier'
+import StudentDashboard from "./pages/StudentDashboard"
+import TeacherDashboard from "./pages/TeacherDashboard"
 
 
 
@@ -29,9 +31,10 @@ function App() {
 			<Router>
 			<NavBar />
 				<Routes>
-				<Route path='/' element={<Dashboard />}/>
+				<Route path='/permissions' element={<Permissions />}/>
+				<Route path='/studentDashboard' element={<StudentDashboard />}/>
+				<Route path='/teacherDashboard' element={< TeacherDashboard/>}/>
 				<Route path='/stream' element={<Stream />}/>
-					<Route path='/dashboard' element={<Dashboard />}/>
 					<Route path='/Profile' element={<Profile />}/>
 					<Route path='/login' element={<Login />}/>
 					<Route path='/register' element={<Register />}/>
