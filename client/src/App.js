@@ -10,6 +10,7 @@ import Stream from "./pages/stream"
 import Permissions from './pages/permissionBarrier'
 import StudentDashboard from "./pages/StudentDashboard"
 import TeacherDashboard from "./pages/TeacherDashboard"
+import Viewer from "./pages/viewer"
 
 
 
@@ -39,6 +40,8 @@ function App() {
 					<Route path='/login' element={<Login />}/>
 					<Route path='/register' element={<Register />}/>
 					<Route path='/calendar' element={<Calendar />}/>
+					<Route path='/viewer' element={<Viewer />}/>
+					
 
 				</Routes>
 			</Router>

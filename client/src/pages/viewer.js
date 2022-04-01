@@ -13,9 +13,10 @@ import { Client, LocalStream } from 'ion-sdk-js';
 import { IonSFUJSONRPCSignal } from 'ion-sdk-js/lib/signal/json-rpc-impl';
 
 
-const Stream = () =>{
+const Viewer = () =>{
   let navigate = useNavigate()
-  const pubVideo = useRef();
+  const subVideo = useRef();
+  const localVideo = useRef();
 
   useEffect(() => {
       userAuthenticated();
@@ -53,32 +54,43 @@ const [data, setData] = useState({})
     client = new Client(signal, config);
     signal.onopen = () => client.join("test room");
     
-    LocalStream.getUserMedia({
-      resolution: 'vga',
-      audio: true,
-      codec: "vp8"
-    }).then((media) => {
-    pubVideo.current.srcObject = media;
-    pubVideo.current.autoplay = true;
-    pubVideo.current.controls = true;
-    pubVideo.current.muted = true;
-    client.publish(media);
-    })
-  }
+    client.ontrack = (track, stream) => {
+        console.log("got track: ", track.id, "for stream: ", stream.id);
+        track.onunmute = () => {
+          subVideo.current.srcObject = stream;
+          subVideo.current.autoplay = true;
+          subVideo.current.muted = false;
 
+          stream.onremovetrack = () => {
+            subVideo.current.srcObject = null;
+  }
+}}}
+
+
+var constraints = { audio: true, video: { width: 1280, height: 720 } };
+
+navigator.mediaDevices.getUserMedia(constraints)
+.then(function(mediaStream) {
+  localVideo.current.srcObject = mediaStream;
+  localVideo.current.onloadedmetadata = function(e) {
+    localVideo.current.play();
+  };
+})
+.catch(function(err) { console.log(err.name + ": " + err.message); }); // always check for errors at the end.
 
 
   return (
       <>
       <div className="grid grid-cols-3">
       <div className="col-span-2 mt-32 mx-5">
-        <div><video autoPlay={true} id="videoElement" ref={pubVideo} className='rounded-lg shadow-lg min-w-[100%]'></video>
+        <div><video autoPlay={true} id="videoElement" controls ref={subVideo} className='rounded-lg shadow-lg min-w-[100%]'></video>
         <div className="max-w-[80%] mx-auto">
         <div className="container mt-5 flex flex-row mx-auto">
           <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto"><AiOutlineAudioMuted size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-red-400 rounded-full mx-auto"><FiPhone size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-gray-300 rounded-full text-green-400 mx-auto"><AiOutlineUserAdd size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto"><BsThreeDots size={40} className="mx-auto text-center mt-5 p-2"/></div>
+            <video autoPlay={true} id="localVideo" ref={localVideo} className='rounded-lg shadow-lg  h-24'></video>
 
         </div>
         </div>
@@ -123,4 +135,4 @@ const [data, setData] = useState({})
     </>
   );
 }
-export default Stream;
+export default Viewer;
