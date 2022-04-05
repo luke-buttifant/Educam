@@ -2,7 +2,7 @@ import { Scheduler } from "@aldabil/react-scheduler";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useNavigate, useResolvedPath } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -17,6 +17,7 @@ const Calendar = () =>{
 
 const [data, setData] = useState({})
 const [users, setUsers] = useState()
+const [isAdmin, setIsAdmin] = useState();
 
   const userAuthenticated = async () => {
       var user = await axios.get("/api/users/currentUser", {headers: {
@@ -25,6 +26,7 @@ const [users, setUsers] = useState()
       setData(response.data)
       console.log(response.data.is_teacher)
       if(response.data.is_teacher === true){
+        setIsAdmin(true)
       }
       if(response.data.message == "authentication failed"){
         localStorage.removeItem("jwt");
@@ -45,18 +47,19 @@ const [users, setUsers] = useState()
       "x-access-token": localStorage.getItem("jwt")
     }})
     if (action === "edit") {
-      /** PUT event to remote DB */
+      var classroom = await axios.post("/api/classroom/editClassroom" ,{_id: user.data._id, event_id: event.event_id, title: event.title, start: event.start, end: event.end})
+      console.log(event)
     } else if (action === "create") {
       console.log(event, action);
       var classroom = await axios.post("/api/classroom/addClassroom",{_id: user.data._id ,classroom: {
-        title: event.title, start: event.start, end: event.end,room: '123'}
+        event_id: Math.floor(Math.random() * 9999), title: event.title, start: event.start, end: event.end,room: '123'}
       })
       }
       
       return new Promise((res, rej) => {
           res({
             ...event,
-            event_id: event.event_id
+            event_id: event.event_id || Math.floor(Math.random() * 9999)
           });
       });
     } 
@@ -70,7 +73,7 @@ const fetchRemote = async () => {
     return new Promise((res) => {
 
       for (let i = 0; i < user.data.classrooms.length; i++) {
-        events.push({event_id: i, title: user.data.classrooms[i].title, start:  new Date(user.data.classrooms[i].start), end: new Date(user.data.classrooms[i].end)})
+        events.push({event_id: user.data.classrooms[i].event_id, title: user.data.classrooms[i].title, start:  new Date(user.data.classrooms[i].start), end: new Date(user.data.classrooms[i].end)})
       }
       console.log(events)
       try{
@@ -125,27 +128,27 @@ week={{
 
 const AdminCalendar = (users) =>{
   let options = []
-  // console.log(`data${}`)
-  for(let i = 0; i < users.data.length; i++ ){
-    options.push({id: i, text: `test${i}`, value: i})
-  }
+  console.log(`data: ${users}`)
+  // for(let i = 0; i < users.data.length; i++ ){
+  //   options.push({id: i, text: `test${i}`, value: i})
+  // }
     return <ThemeProvider theme={theme}>
     <Scheduler
-    fields={[
-      {
-        name: "student_id",
-        type: "select",
+    // fields={[
+    //   {
+    //     name: "student_id",
+    //     type: "select",
         
-        // Should provide options with type:"select"
-        options: options,
-        config: { label: "Add Students", multiple: true, }
-      },
-      {
-        name: "Room ID",
-        type: "input",
-        config: { label: "Room ID", multiline: false}
-      }
-    ]}
+    //     // Should provide options with type:"select"
+    //     options: options,
+    //     config: { label: "Add Students", multiple: true, }
+    //   },
+    //   {
+    //     name: "Room ID",
+    //     type: "input",
+    //     config: { label: "Room ID", multiline: false}
+    //   }
+    // ]}
     onConfirm={handleConfirm}
     remoteEvents={fetchRemote}
 view="month"
@@ -182,7 +185,7 @@ week={{
           <div className="flex mx-auto">
           <div className="w-4 min-h-max bg-secondary mx-auto rounded-l-lg"></div>
           <div className="min-w-[99%] dark:bg-dark-mode-secondary bg-white p-2 rounded-r-lg">
-          <CalendarGui isAdmin={true}/>
+          <CalendarGui isAdmin={isAdmin}/>
 
 </div>
 </div>

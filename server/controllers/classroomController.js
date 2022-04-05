@@ -1,4 +1,5 @@
 const User = require('../model/userModel')
+
 const asyncHandler = require('express-async-handler');
 require("dotenv").config();
 
@@ -31,4 +32,21 @@ const getClassrooms = asyncHandler(async (req, res) => {
     }
 })
 
-module.exports = { addClassroom, getClassrooms}
+const editClassroom = asyncHandler(async (req, res) => {
+    const {_id, event_id, title, start, end} = req.body
+    try{
+        const classroom = await User.findOneAndUpdate({_id: _id, "classrooms.event_id": event_id},{
+           "$set":{
+               "classrooms.$.title": title,
+               "classrooms.$.start": start,
+               "classrooms.$.end": end,
+           }
+        });
+        console.log(classroom);
+        res.send(classroom)
+    }catch(err){
+        console.log(err);
+    }
+})
+
+module.exports = { addClassroom, getClassrooms, editClassroom}

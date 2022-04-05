@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 
 const classroom = mongoose.Schema([
   {
+  event_id: Number,
   title: String,
   start: String,
   end: String,
