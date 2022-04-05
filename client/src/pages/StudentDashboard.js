@@ -46,6 +46,7 @@ const [data, setData] = useState({})
       "x-access-token": localStorage.getItem("jwt")
     }}).then((response) => {
       setData(response.data)
+      
       if(response.data.message == "authentication failed"){
         localStorage.removeItem("jwt");
         navigate("/login")

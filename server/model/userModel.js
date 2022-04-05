@@ -1,6 +1,14 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt');
 
+const classroom = mongoose.Schema([
+  {
+  title: String,
+  start: String,
+  end: String,
+  room: String,
+}])
+
 const userSchema = mongoose.Schema(
   {
     first_name: {
@@ -40,6 +48,7 @@ const userSchema = mongoose.Schema(
       type: String,
       required: [true, 'Please add your dob'],
   },
+  classrooms: [classroom]
   },
   {
     timestamps: true,

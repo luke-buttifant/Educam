@@ -65,9 +65,8 @@ const specificUser = asyncHandler(async (req, res) => {
 
 const currentUserInfo = asyncHandler(async (req, res) => {
     try{
-        console.log(req.userId)
         const user = await User.findById(req.userId);
-        console.log(user);
+        console.log(user.first_name);
         res.send(user)
     }catch(err){
         console.log(err);

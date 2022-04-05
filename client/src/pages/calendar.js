@@ -2,83 +2,30 @@ import { Scheduler } from "@aldabil/react-scheduler";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useResolvedPath } from "react-router-dom";
 
-
-// import { EVENTS } from "./events";
-
-// export default function App() {
-//   const fetchRemote = async (query) => {
-//     console.log("Query: ", query);
-//     /**Simulate fetchin remote data */
-//     return new Promise((res) => {
-//       setTimeout(() => {
-//         res(EVENTS);
-//       }, 3000);
-//     });
-//   };
-
-//   const handleConfirm = async (event, action) => {
-//     console.log(event, action);
-//     if (action === "edit") {
-//       /** PUT event to remote DB */
-//     } else if (action === "create") {
-//       /**POST event to remote DB */
-//     }
-//     /**
-//      * Make sure to return 4 mandatory fields:
-//      * event_id: string|number
-//      * title: string
-//      * start: Date|string
-//      * end: Date|string
-//      * ....extra other fields depend on your custom fields/editor properties
-//      */
-//     // Simulate http request: return added/edited event
-//     return new Promise((res, rej) => {
-//       setTimeout(() => {
-//         res({
-//           ...event,
-//           event_id: event.event_id || Math.random()
-//         });
-//       }, 3000);
-//     });
-//   };
-
-//   const handleDelete = async (deletedId) => {
-//     // Simulate http request: return the deleted id
-//     return new Promise((res, rej) => {
-//       setTimeout(() => {
-//         res(deletedId);
-//       }, 3000);
-//     });
-//   };
-
-//   return (
-//     <Scheduler
-//       remoteEvents={fetchRemote}
-//       onConfirm={handleConfirm}
-//       onDelete={handleDelete}
-//       selectedDate={new Date(2021, 4, 5)}
-//     />
-//   );
-// }
 
 
 const Calendar = () =>{
   let navigate = useNavigate()
-
   useEffect(() => {
-      userAuthenticated();
+    userAuthenticated()
+    getAllUsers()
+
+
     }, [navigate]);
-   
 
 const [data, setData] = useState({})
+const [users, setUsers] = useState()
 
   const userAuthenticated = async () => {
       var user = await axios.get("/api/users/currentUser", {headers: {
       "x-access-token": localStorage.getItem("jwt")
     }}).then((response) => {
       setData(response.data)
+      console.log(response.data.is_teacher)
+      if(response.data.is_teacher === true){
+      }
       if(response.data.message == "authentication failed"){
         localStorage.removeItem("jwt");
         navigate("/login")
@@ -86,13 +33,59 @@ const [data, setData] = useState({})
     })
   }
 
-  var root = document.getElementById('rootChild');
-  // if(root.classList.contains('bg-dark-mode')){
-  //   var MUIThemeText = '#ffffff'
-  // }
-  // else{
-  //   var MUIThemeText = '#000000'
-  // }
+  const getAllUsers = async () => {
+    var users = await axios.get("/api/users", {headers: {
+    "x-access-token": localStorage.getItem("jwt")}})
+    setUsers(users)
+}
+
+
+  const handleConfirm = async (event, action) => {
+    var user = await axios.get("/api/users/currentUser",  {headers: {
+      "x-access-token": localStorage.getItem("jwt")
+    }})
+    if (action === "edit") {
+      /** PUT event to remote DB */
+    } else if (action === "create") {
+      console.log(event, action);
+      var classroom = await axios.post("/api/classroom/addClassroom",{_id: user.data._id ,classroom: {
+        title: event.title, start: event.start, end: event.end,room: '123'}
+      })
+      }
+      
+      return new Promise((res, rej) => {
+          res({
+            ...event,
+            event_id: event.event_id
+          });
+      });
+    } 
+
+const fetchRemote = async () => {
+  var user = await axios.get("/api/users/currentUser",  {headers: {
+    "x-access-token": localStorage.getItem("jwt")
+  }})
+  var events = []
+
+    return new Promise((res) => {
+
+      for (let i = 0; i < user.data.classrooms.length; i++) {
+        events.push({event_id: i, title: user.data.classrooms[i].title, start:  new Date(user.data.classrooms[i].start), end: new Date(user.data.classrooms[i].end)})
+      }
+      console.log(events)
+      try{
+        res(
+          events
+        );
+      }
+      catch{
+        console.log("error")
+      }
+
+    });
+  }
+
+
 
   const theme = createTheme({
     palette: {
@@ -107,6 +100,81 @@ const [data, setData] = useState({})
         },
     },
   });
+
+  function UserCalendar(){
+    return <ThemeProvider theme={theme}>
+    <Scheduler
+    onConfirm={handleConfirm}
+    remoteEvents={fetchRemote}
+view="month"
+month={{
+ weekDays: [0,1,2,3,4,5,6],
+ weekStartOn: 6, 
+ startHour: 9, 
+ endHour: 17,
+}}
+week={{ 
+ weekDays: [0, 1, 2, 3, 4, 5, 6], 
+ weekStartOn: 6, 
+ startHour: 9, 
+ endHour: 17,
+ step: 60
+  }}
+/> </ThemeProvider>
+  }
+
+const AdminCalendar = (users) =>{
+  let options = []
+  // console.log(`data${}`)
+  for(let i = 0; i < users.data.length; i++ ){
+    options.push({id: i, text: `test${i}`, value: i})
+  }
+    return <ThemeProvider theme={theme}>
+    <Scheduler
+    fields={[
+      {
+        name: "student_id",
+        type: "select",
+        
+        // Should provide options with type:"select"
+        options: options,
+        config: { label: "Add Students", multiple: true, }
+      },
+      {
+        name: "Room ID",
+        type: "input",
+        config: { label: "Room ID", multiline: false}
+      }
+    ]}
+    onConfirm={handleConfirm}
+    remoteEvents={fetchRemote}
+view="month"
+month={{
+ weekDays: [0,1,2,3,4,5,6],
+ weekStartOn: 6, 
+ startHour: 9, 
+ endHour: 17,
+}}
+week={{ 
+ weekDays: [0, 1, 2, 3, 4, 5, 6], 
+ weekStartOn: 6, 
+ startHour: 9, 
+ endHour: 17,
+ step: 60
+  }}
+
+
+/> </ThemeProvider>
+  }
+
+  function CalendarGui(props){
+    const isAdmin = props.isAdmin
+
+    if(!isAdmin){
+      return <UserCalendar  />;
+    }
+    return <AdminCalendar data={users}/>;
+  }
     return (
         <>
         
@@ -114,38 +182,8 @@ const [data, setData] = useState({})
           <div className="flex mx-auto">
           <div className="w-4 min-h-max bg-secondary mx-auto rounded-l-lg"></div>
           <div className="min-w-[99%] dark:bg-dark-mode-secondary bg-white p-2 rounded-r-lg">
-          <ThemeProvider theme={theme}>
-        <Scheduler
-  view="month"
-  month={{
-    weekDays: [0,1,2,3,4,5,6],
-    weekStartOn: 6, 
-    startHour: 9, 
-    endHour: 17,
-  }}
-  week={{ 
-    weekDays: [0, 1, 2, 3, 4, 5, 6], 
-    weekStartOn: 6, 
-    startHour: 9, 
-    endHour: 17,
-    step: 60
-     }}
-  
-  events={[
-    {
-      event_id: 1,
-      title: "Event 1",
-      start: new Date("2022 3 16 09:30"),
-      end: new Date("2022 3 16 10:30"),
-    },
-    {
-      event_id: 2,
-      title: "Event 2",
-      start: new Date("2021 5 4 10:00"),
-      end: new Date("2021 5 4 11:00"),
-    },
-  ]}
-/> </ThemeProvider>
+          <CalendarGui isAdmin={true}/>
+
 </div>
 </div>
       <div className="mx-auto w-max">

@@ -16,6 +16,10 @@ import { IonSFUJSONRPCSignal } from 'ion-sdk-js/lib/signal/json-rpc-impl';
 const Stream = () =>{
   let navigate = useNavigate()
   const pubVideo = useRef();
+  const [clientState, setClientState] = useState()
+  const [local, setLocal] = useState()
+
+  
 
   useEffect(() => {
       userAuthenticated();
@@ -51,9 +55,11 @@ const [data, setData] = useState({})
   function connectToSFU(){
     signal = new IonSFUJSONRPCSignal("wss://test.bestwebrtc.co.uk/ws");
     client = new Client(signal, config);
+    setClientState(client);
+
     signal.onopen = () => client.join("test room");
     
-    LocalStream.getUserMedia({
+   LocalStream.getUserMedia({
       resolution: 'vga',
       audio: true,
       codec: "vp8"
@@ -67,6 +73,11 @@ const [data, setData] = useState({})
   }
 
 
+  function endCall(){
+    clientState.close();
+  }
+
+
 
   return (
       <>
@@ -75,8 +86,8 @@ const [data, setData] = useState({})
         <div><video autoPlay={true} id="videoElement" ref={pubVideo} className='rounded-lg shadow-lg min-w-[100%]'></video>
         <div className="max-w-[80%] mx-auto">
         <div className="container mt-5 flex flex-row mx-auto">
-          <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto"><AiOutlineAudioMuted size={40} className="mx-auto text-center mt-5 p-2"/></div>
-            <div className="w-20 h-20 bg-red-400 rounded-full mx-auto"><FiPhone size={40} className="mx-auto text-center mt-5 p-2"/></div>
+          <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto" ><AiOutlineAudioMuted size={40} className="mx-auto text-center mt-5 p-2"/></div>
+            <div className="w-20 h-20 bg-red-400 rounded-full mx-auto" onClick={endCall}><FiPhone size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-gray-300 rounded-full text-green-400 mx-auto"><AiOutlineUserAdd size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto"><BsThreeDots size={40} className="mx-auto text-center mt-5 p-2"/></div>
 

@@ -16,7 +16,6 @@ import Viewer from "./pages/viewer"
 
 function App() {
 
-
 	if (localStorage.theme === 'dark') {
 		document.documentElement.classList.add('dark')
 		document.documentElement.classList.add("bg-dark-mode")

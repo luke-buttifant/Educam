@@ -9,19 +9,45 @@ import dp from '../images/dp.png'
 import ChatMessage from "../components/chat.js";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Client, LocalStream } from 'ion-sdk-js';
+import { Client } from 'ion-sdk-js';
 import { IonSFUJSONRPCSignal } from 'ion-sdk-js/lib/signal/json-rpc-impl';
+import io from 'socket.io-client';
+const socket = io.connect("http://localhost:3001");
 
 
 const Viewer = () =>{
+ //Room State
+ const [room, setRoom] = useState("");
+
+ // Messages States
+ const [message, setMessage] = useState("");
+ const [messageReceived, setMessageReceived] = useState("");
+
+
+  const joinRoom = () => {
+    if (room !== "") {
+      socket.emit("join_room", localStorage.getItem("room"));
+    }
+  };
+
+  const sendMessage = () => {
+    socket.emit("send_message", { message, room });
+  };
+
+
   let navigate = useNavigate()
   const subVideo = useRef();
   const localVideo = useRef();
+  
 
   useEffect(() => {
       userAuthenticated();
       connectToSFU();
-    }, [navigate]);
+      joinRoom();
+      socket.on("receive_message", (data) => {
+        setMessageReceived(data.message);
+      });
+    }, [navigate, socket]);
    
 
 const [data, setData] = useState({})
@@ -31,6 +57,7 @@ const [data, setData] = useState({})
       "x-access-token": localStorage.getItem("jwt")
     }}).then((response) => {
       setData(response.data)
+      localStorage.setItem("room", response.data.Classrooms.English.room)
       if(response.data.message == "authentication failed"){
         localStorage.removeItem("jwt");
         navigate("/login")
@@ -67,16 +94,16 @@ const [data, setData] = useState({})
 }}}
 
 
-var constraints = { audio: true, video: { width: 1280, height: 720 } };
+// var constraints = { audio: true, video: { width: 1280, height: 720 } };
 
-navigator.mediaDevices.getUserMedia(constraints)
-.then(function(mediaStream) {
-  localVideo.current.srcObject = mediaStream;
-  localVideo.current.onloadedmetadata = function(e) {
-    localVideo.current.play();
-  };
-})
-.catch(function(err) { console.log(err.name + ": " + err.message); }); // always check for errors at the end.
+// navigator.mediaDevices.getUserMedia(constraints)
+// .then(function(mediaStream) {
+//   localVideo.current.srcObject = mediaStream;
+//   localVideo.current.onloadedmetadata = function(e) {
+//     localVideo.current.play();
+//   };
+// })
+// .catch(function(err) { console.log(err.name + ": " + err.message); }); // always check for errors at the end.
 
 
   return (
@@ -90,7 +117,7 @@ navigator.mediaDevices.getUserMedia(constraints)
             <div className="w-20 h-20 bg-red-400 rounded-full mx-auto"><FiPhone size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-gray-300 rounded-full text-green-400 mx-auto"><AiOutlineUserAdd size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto"><BsThreeDots size={40} className="mx-auto text-center mt-5 p-2"/></div>
-            <video autoPlay={true} id="localVideo" ref={localVideo} className='rounded-lg shadow-lg  h-24'></video>
+            {/* <video autoPlay={true} id="localVideo" ref={localVideo} className='rounded-lg shadow-lg  h-24'></video> */}
 
         </div>
         </div>
@@ -109,7 +136,7 @@ navigator.mediaDevices.getUserMedia(constraints)
             </div>
             <div className="max-h-[80%] overflow-auto noScrollBar">
             <div className="flex flex-col divide-y">
-            <ChatMessage dp={dp} name="Luke" message="message..." time="09.24pm" />
+            <ChatMessage dp={dp} name="Luke" message={messageReceived} time="09.24pm" />
             <ChatMessage dp={dp} name="Luke" message="message..." time="09.24pm" />
             <ChatMessage dp={dp} name="Luke" message="message..." time="09.24pm" />
             <ChatMessage dp={dp} name="Luke" message="message..." time="09.24pm" />
@@ -122,8 +149,10 @@ navigator.mediaDevices.getUserMedia(constraints)
 
         </div>
         <div className="justify-center flex  w-[100%] mx-auto bg-white dark:bg-dark-mode-secondary">
-                <input type="text" className="mx-auto min-w-[80%] bg-secondary text-white p-4 rounded-lg m-2" placeholder="Message..."></input>
-                <button className="p-2 dark:text-white"><BiSend size={38}/></button>
+                <input type="text" className="mx-auto min-w-[80%] bg-secondary text-white p-4 rounded-lg m-2" placeholder="Message..." onChange={(event) =>{
+                  setMessage(event.target.value)
+                }}></input>
+                <button onClick={sendMessage} className="p-2 dark:text-white"><BiSend size={38}/></button>
                 </div>
 
 
