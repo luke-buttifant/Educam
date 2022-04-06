@@ -8,6 +8,8 @@ const classroom = mongoose.Schema([
   start: String,
   end: String,
   room: String,
+  lastClassAttendanceTime: String,
+  totalAttendanceTime: String,
 }])
 
 const userSchema = mongoose.Schema(

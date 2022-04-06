@@ -168,7 +168,7 @@ const [data, setData] = useState({})
             <div className='m-0 mx-auto'>
           
           <div className='grid grid-cols-2 gap-2 mb-10 text-center bg-white dark:bg-dark-mode-secondary px-10 py-4 rounded-lg'>
-          <div className='flex flex-col'><a href='/stream'><div className='bg-secondary rounded-lg shadow-lg flex flex-col'><button className='p-5 text-center text-white' type='button'><BiVideoPlus size={100}/></button></div></a>
+          <div className='flex flex-col'><a href='/viewer'><div className='bg-secondary rounded-lg shadow-lg flex flex-col'><button className='p-5 text-center text-white' type='button'><BiVideoPlus size={100}/></button></div></a>
             <div className='text-xl font-bold dark:text-white'>New Classroom</div></div>
             <div className='flex flex-col'>
           <div className='bg-dark-mode rounded-lg shadow-lg'><button className='p-5 mx-auto text-center text-white' type='button'><AiOutlineSchedule size={100} /></button></div>

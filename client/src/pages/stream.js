@@ -11,6 +11,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Client, LocalStream } from 'ion-sdk-js';
 import { IonSFUJSONRPCSignal } from 'ion-sdk-js/lib/signal/json-rpc-impl';
+import io from 'socket.io-client';
+const socket = io.connect("http://localhost:3001");
 
 
 const Stream = () =>{
@@ -19,12 +21,29 @@ const Stream = () =>{
   const [clientState, setClientState] = useState()
   const [local, setLocal] = useState()
 
-  
+  const [room, setRoom] = useState("");
+   // Messages States
+ const [message, setMessage] = useState("");
+ const [messageReceived, setMessageReceived] = useState("");
+
+  // const joinRoom = () => {
+  //   if (room !== "") {
+  //     socket.emit("join_room", localStorage.getItem("room"));
+  //   }
+  // };
+
+  const sendMessage = () => {
+    socket.emit("send_message", { message });
+  };
 
   useEffect(() => {
       userAuthenticated();
       connectToSFU();
-    }, [navigate]);
+      // joinRoom();
+      socket.on("receive_message", (data) => {
+        setMessageReceived(data.message);
+      });
+    }, [navigate, socket]);
    
 
 const [data, setData] = useState({})
@@ -75,6 +94,7 @@ const [data, setData] = useState({})
 
   function endCall(){
     clientState.close();
+    socket.emit("end_call");
   }
 
 
@@ -108,7 +128,7 @@ const [data, setData] = useState({})
             </div>
             <div className="max-h-[80%] overflow-auto noScrollBar">
             <div className="flex flex-col divide-y">
-            <ChatMessage dp={dp} name="Luke" message="message..." time="09.24pm" />
+            <ChatMessage dp={dp} name="Luke" message={messageReceived} time="09.24pm" />
             <ChatMessage dp={dp} name="Luke" message="message..." time="09.24pm" />
             <ChatMessage dp={dp} name="Luke" message="message..." time="09.24pm" />
             <ChatMessage dp={dp} name="Luke" message="message..." time="09.24pm" />
@@ -121,8 +141,9 @@ const [data, setData] = useState({})
 
         </div>
         <div className="justify-center flex  w-[100%] mx-auto bg-white dark:bg-dark-mode-secondary">
-                <input type="text" className="mx-auto min-w-[80%] bg-secondary text-white p-4 rounded-lg m-2" placeholder="Message..."></input>
-                <button className="p-2 dark:text-white"><BiSend size={38}/></button>
+                <input type="text" className="mx-auto min-w-[80%] bg-secondary text-white p-4 rounded-lg m-2" placeholder="Message..." onChange={(event) =>{
+                  setMessage(event.target.value)}} ></input>
+                <button onClick={sendMessage} className="p-2 dark:text-white"><BiSend size={38}/></button>
                 </div>
 
 

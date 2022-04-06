@@ -53,9 +53,14 @@ app.get("/api", (req, res) => {
     });
   
     socket.on("send_message", (data) => {
-      socket.to(data.room).emit("receive_message", data);
+      socket.broadcast.emit("receive_message", data);
       console.log(data)
     });
+
+    socket.on("end_call", () => {
+      socket.broadcast.emit("close_meeting");
+      console.log("meeting ended")
+    })
   });
 
   server.listen(PORT, () => {
