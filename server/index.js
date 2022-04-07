@@ -45,7 +45,13 @@ app.get("/api", (req, res) => {
   });
 
   io.on("connection", (socket) => {
+    socket.broadcast.emit("user_connected");
     console.log(`User Connected: ${socket.id}`);
+
+
+    socket.on("disconnect", () => {
+      socket.broadcast.emit("user_disconnected")
+    })
   
     socket.on("join_room", (data) => {
       socket.join(data);

@@ -38,6 +38,7 @@
     "react-papaparse": "^4.0.2",
     "react-router-dom": "^6.2.1",
     "react-scripts": "5.0.0",
+    "react-scroll-to-bottom": "^4.2.0",
     "react-timer-hook": "^3.0.5",
     "react-webcam": "^6.0.1",
     "simple-peer": "^9.11.0",

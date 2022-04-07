@@ -1,4 +1,5 @@
 import {React, useState, useEffect, useRef} from "react"
+import * as ReactDOM from 'react-dom';
 import "../App.css"
 import VideoFeed from "../components/getVideoFeed";
 import {BsFillPlusCircleFill, BsThreeDots} from 'react-icons/bs'
@@ -18,13 +19,19 @@ const socket = io.connect("http://localhost:3001");
 const Stream = () =>{
   let navigate = useNavigate()
   const pubVideo = useRef();
+  const chatRoom = useRef();
+  const input = useRef();
   const [clientState, setClientState] = useState()
   const [local, setLocal] = useState()
+  const [connections, setConnections] = useState(0)
 
   const [room, setRoom] = useState("");
    // Messages States
  const [message, setMessage] = useState("");
- const [messageReceived, setMessageReceived] = useState("");
+ const [picture, setPicture] = useState()
+ const [firstName, setFirstName] = useState()
+ const [messageList, setMessageList] = useState([]);
+
 
   // const joinRoom = () => {
   //   if (room !== "") {
@@ -32,17 +39,35 @@ const Stream = () =>{
   //   }
   // };
 
-  const sendMessage = () => {
-    socket.emit("send_message", { message });
+  const sendMessage = async () => {
+    const messageData = { message: message, picture: picture, firstName: firstName, time: new Date(Date.now()).getHours() + ":" + new Date(Date.now()).getMinutes()}
+    socket.emit("send_message", messageData );
+    setMessageList((list) => [...list, messageData])
+    input.current.value = '';
   };
 
+  window.onload = () => {
+    
+  }
+  var connectedUsers = 0
+
+  window.onload = () => {
+    userAuthenticated();
+    connectToSFU();
+  }
+
   useEffect(() => {
-      userAuthenticated();
-      connectToSFU();
       // joinRoom();
       socket.on("receive_message", (data) => {
-        setMessageReceived(data.message);
+        setMessageList((list) => [...list, data])
+
       });
+      socket.on("user_connected", () => {
+        
+      });
+      socket.on("user_disconnected", () => {
+        console.log(`User Disconnected`)
+      })
     }, [navigate, socket]);
    
 
@@ -53,6 +78,8 @@ const [data, setData] = useState({})
       "x-access-token": localStorage.getItem("jwt")
     }}).then((response) => {
       setData(response.data)
+      setPicture(response.data.pic)
+      setFirstName(response.data.first_name)
       if(response.data.message == "authentication failed"){
         localStorage.removeItem("jwt");
         navigate("/login")
@@ -95,19 +122,21 @@ const [data, setData] = useState({})
   function endCall(){
     clientState.close();
     socket.emit("end_call");
+    navigate('/permissions')
   }
 
 
 
   return (
       <>
+      <h1>Users Connected: {connections}</h1>
       <div className="grid grid-cols-3">
       <div className="col-span-2 mt-32 mx-5">
         <div><video autoPlay={true} id="videoElement" ref={pubVideo} className='rounded-lg shadow-lg min-w-[100%]'></video>
         <div className="max-w-[80%] mx-auto">
         <div className="container mt-5 flex flex-row mx-auto">
           <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto" ><AiOutlineAudioMuted size={40} className="mx-auto text-center mt-5 p-2"/></div>
-            <div className="w-20 h-20 bg-red-400 rounded-full mx-auto" onClick={endCall}><FiPhone size={40} className="mx-auto text-center mt-5 p-2"/></div>
+            <div className="w-20 h-20 bg-red-400 rounded-full mx-auto cursor-pointer hover:opacity-50" onClick={endCall}><FiPhone size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-gray-300 rounded-full text-green-400 mx-auto"><AiOutlineUserAdd size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto"><BsThreeDots size={40} className="mx-auto text-center mt-5 p-2"/></div>
 
@@ -127,13 +156,12 @@ const [data, setData] = useState({})
                 <div className="w-full border-t border-4 border-secondary"></div>
             </div>
             <div className="max-h-[80%] overflow-auto noScrollBar">
-            <div className="flex flex-col divide-y">
-            <ChatMessage dp={dp} name="Luke" message={messageReceived} time="09.24pm" />
-            <ChatMessage dp={dp} name="Luke" message="message..." time="09.24pm" />
-            <ChatMessage dp={dp} name="Luke" message="message..." time="09.24pm" />
-            <ChatMessage dp={dp} name="Luke" message="message..." time="09.24pm" />
-            
-            
+            <div id="chat-room" ref={chatRoom} className="flex flex-col divide-y">
+              {messageList.map((messageContent) => {
+                return(
+                  <ChatMessage dp={messageContent.picture} name={messageContent.firstName} message={messageContent.message} time={messageContent.time} />
+                )
+              })}
             </div>
             </div>
 
@@ -141,7 +169,7 @@ const [data, setData] = useState({})
 
         </div>
         <div className="justify-center flex  w-[100%] mx-auto bg-white dark:bg-dark-mode-secondary">
-                <input type="text" className="mx-auto min-w-[80%] bg-secondary text-white p-4 rounded-lg m-2" placeholder="Message..." onChange={(event) =>{
+                <input ref={input} type="text" className="mx-auto min-w-[80%] bg-secondary text-white p-4 rounded-lg m-2" placeholder="Message..." onKeyPress={(event) => {event.key === "Enter" && sendMessage()}} onChange={(event) =>{
                   setMessage(event.target.value)}} ></input>
                 <button onClick={sendMessage} className="p-2 dark:text-white"><BiSend size={38}/></button>
                 </div>
