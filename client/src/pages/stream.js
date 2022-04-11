@@ -12,11 +12,13 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Client, LocalStream } from 'ion-sdk-js';
 import { IonSFUJSONRPCSignal } from 'ion-sdk-js/lib/signal/json-rpc-impl';
+import {useLocation} from 'react-router-dom';
 import io from 'socket.io-client';
 const socket = io.connect("http://localhost:3001");
 
 
 const Stream = () =>{
+  const location = useLocation();
   let navigate = useNavigate()
   const pubVideo = useRef();
   const chatRoom = useRef();
@@ -24,6 +26,7 @@ const Stream = () =>{
   const [clientState, setClientState] = useState()
   const [local, setLocal] = useState()
   const [connections, setConnections] = useState(0)
+  const [once, setOnce] = useState(false)
 
   const [room, setRoom] = useState("");
    // Messages States
@@ -32,12 +35,13 @@ const Stream = () =>{
  const [firstName, setFirstName] = useState()
  const [messageList, setMessageList] = useState([]);
 
+   console.log(location.state);
 
-  // const joinRoom = () => {
-  //   if (room !== "") {
-  //     socket.emit("join_room", localStorage.getItem("room"));
-  //   }
-  // };
+  const joinRoom = () => {
+    if (room !== "") {
+      socket.emit("join_room", location.state);
+    }
+  };
 
   const sendMessage = async () => {
     const messageData = { message: message, picture: picture, firstName: firstName, time: new Date(Date.now()).getHours() + ":" + new Date(Date.now()).getMinutes()}
@@ -47,16 +51,12 @@ const Stream = () =>{
   };
 
   window.onload = () => {
-    
-  }
-  var connectedUsers = 0
-
-  window.onload = () => {
     userAuthenticated();
-    connectToSFU();
   }
 
   useEffect(() => {
+    connectToSFU();
+    setOnce(true)
       // joinRoom();
       socket.on("receive_message", (data) => {
         setMessageList((list) => [...list, data])
@@ -103,7 +103,7 @@ const [data, setData] = useState({})
     client = new Client(signal, config);
     setClientState(client);
 
-    signal.onopen = () => client.join("test room");
+    signal.onopen = () => client.join(location.state);
     
    LocalStream.getUserMedia({
       resolution: 'vga',
@@ -130,6 +130,7 @@ const [data, setData] = useState({})
   return (
       <>
       <h1>Users Connected: {connections}</h1>
+      <div>Room: {location.state}</div>
       <div className="grid grid-cols-3">
       <div className="col-span-2 mt-32 mx-5">
         <div><video autoPlay={true} id="videoElement" ref={pubVideo} className='rounded-lg shadow-lg min-w-[100%]'></video>

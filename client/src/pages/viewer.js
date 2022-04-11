@@ -7,7 +7,7 @@ import {FiPhone} from 'react-icons/fi'
 import {AiOutlineAudioMuted, AiOutlineUserAdd} from 'react-icons/ai'
 import dp from '../images/dp.png'
 import ChatMessage from "../components/chat.js";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { Client } from 'ion-sdk-js';
 import { IonSFUJSONRPCSignal } from 'ion-sdk-js/lib/signal/json-rpc-impl';
@@ -16,26 +16,39 @@ import draw from "../utilities";
 import * as tf from '@tensorflow/tfjs'
 import io from 'socket.io-client';
 import ScrollToBottom from 'react-scroll-to-bottom'
+import { useStopwatch, useTimer } from 'react-timer-hook';
 const socket = io.connect("http://localhost:3001");
 
 
 const Viewer = () =>{
-  var timerStart = Date.now();
+  
+  const location = useLocation();
   const blazeface = require('@tensorflow-models/blazeface');
   const webcamRef = useRef(null);
   const canvasRef = useRef(null)
-  const [isRunning, setIsRunning]= useState(true)
+  const [timerRunning, setTimerRunning]= useState(true)
+
+  const {
+    seconds,
+    minutes,
+    hours,
+    days,
+    isRunning,
+    start,
+    pause,
+    reset,
+  } = useStopwatch({autoStart: true});
+  
 
   const runFaceDetection = async () =>{
-
     const model = await blazeface.load()
     console.log("Blazeface loaded...")
-
     setInterval(() => {
       detect(model)
     }, 1000);
   }
 
+  var running = true;
 
   const returnTensors = false;
 
@@ -60,14 +73,18 @@ const Viewer = () =>{
       if(prediction.length > 0){
         // console.log(prediction)
         setAttendance("Attending");
-        if(!isRunning){
-          timeStart();
+        if(!running){
+          start()
+          running = true
         }
       }
       else{
         setAttendance("Not attending")
-        pauseTime();
-        setIsRunning(false)
+        if(running){
+          pause()
+          running = false
+        }
+        console.log(timerRunning)
       }
       
       const ctx = canvasRef.current.getContext("2d");
@@ -75,15 +92,15 @@ const Viewer = () =>{
     }
   }
 
-  runFaceDetection();
+
  //Room State
  const [room, setRoom] = useState("");
- const [attending, setAttendance] = useState("")
+ const [attending, setAttendance] = useState("calculating...")
 
  // Messages States
  const [message, setMessage] = useState("");
- const [picture, setPicture] = useState()
- const [firstName, setFirstName] = useState()
+ const [picture, setPicture] = useState("")
+ const [firstName, setFirstName] = useState("")
  const [messageReceived, setMessageReceived] = useState("");
  const [pictureReceived, setPictureReceived] = useState()
  const [firstNameReceived, setFirstNameReceived] = useState()
@@ -103,7 +120,9 @@ const Viewer = () =>{
     setMessageList((list) => [...list, messageData])
   };
 
-
+  function startTimer(){
+    setInterval()
+  }
   let navigate = useNavigate()
   const subVideo = useRef();
   
@@ -111,10 +130,12 @@ const Viewer = () =>{
   window.onload = () => {
     userAuthenticated();
     connectToSFU();
-    timeStart();
+    runFaceDetection();
+    start()
   }
 
   useEffect(() => {
+    
       // joinRoom();
       socket.on("receive_message", (data) => {
         setMessageList((list) => [...list, data])
@@ -156,7 +177,7 @@ const [data, setData] = useState({})
   function connectToSFU(){
     signal = new IonSFUJSONRPCSignal("wss://test.bestwebrtc.co.uk/ws");
     client = new Client(signal, config);
-    signal.onopen = () => client.join("test room");
+    signal.onopen = () => client.join(location.state);
     
     client.ontrack = (track, stream) => {
         console.log("got track: ", track.id, "for stream: ", stream.id);
@@ -171,37 +192,18 @@ const [data, setData] = useState({})
 }}}
 
 
-const [millisecound, setMilliSecond] = useState(0)
-let timer;
 
-
-function timeStart(){
-  time.current.style.color = "#0f62fe";
-  timer = setInterval(() => {
-    setMilliSecond(millisecound + 10);
-
-    let dateTimer = new Date(millisecound);
-
-    time.current.innerHTML = 
-    ('0'+dateTimer.getUTCHours()).slice(-2) + ':' +
-    ('0'+dateTimer.getUTCMinutes()).slice(-2) + ':' +
-    ('0'+dateTimer.getUTCSeconds()).slice(-2) + ':' +
-    ('0'+dateTimer.getUTCMilliseconds()).slice(-3,-1);
-  }, 10);
-}
-
-function pauseTime() {
-  time.current.style.color = "red";
-  clearInterval(timer);
-}
 
 function end_call(){
   navigate('/permissions')
-
 }
+
+
 
   return (
       <>
+            <div>Room: {location.state}</div>
+            <p>{isRunning ? 'Running' : 'Not running'}</p>
       <div className="grid grid-cols-3">
       <div className="col-span-2 mt-32 mx-5">
         <div><video autoPlay={true} id="videoElement" controls ref={subVideo} className='rounded-lg shadow-lg min-w-[100%]'></video>
@@ -277,7 +279,7 @@ function end_call(){
         <div className="font-bold text-secondary">Attendance Statistics</div>
         <div className="font-light">You are currently: {attending}</div>
         <div className="flex flex-row">
-        <div className="font-light">Attendance time: </div> <div ref={time}></div>
+        <div className="font-light">Attendance time: </div> <div> <span>{days}</span>:<span>{hours}</span>:<span>{minutes}</span>:<span>{seconds}</span></div>
         </div>
 
         </div>

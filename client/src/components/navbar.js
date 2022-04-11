@@ -22,7 +22,7 @@ function NavBar(){
     await userAuthenticated();
   }, []);
 
-const [data, setData] = useState({})
+const [data, setData] = useState({first_name: "Loading..."})
 
   const userAuthenticated = async () => {
     await axios.get("/api/users/currentUser", {headers: {

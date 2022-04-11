@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const User = require('../model/userModel')
-const {getUsers,registerUser, authUser, currentUserInfo,uploadReq, uploadImage } = require('../controllers/userController')
+const {getUsers,registerUser, authUser, currentUserInfo,uploadReq, uploadImage, getAllUsersSpecificSchool } = require('../controllers/userController')
 const verify = require('../middlewares/verifyToken')
 
 
@@ -10,6 +10,7 @@ router.get('/',verify, getUsers)
 router.post('/', registerUser)
 router.post('/login', authUser)
 router.get('/currentUser',verify, currentUserInfo)
+router.get('/UsersFromSchool', getAllUsersSpecificSchool)
 router.post('/updateUser', uploadImage, uploadReq)
 
 

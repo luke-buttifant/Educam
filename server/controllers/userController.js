@@ -151,5 +151,16 @@ const uploadReq = async (req, res) => {
 }
 
 
-module.exports = { getUsers, registerUser, authUser, specificUser, currentUserInfo, uploadImage, uploadReq}
+const getAllUsersSpecificSchool = async (req, res) => {
+    console.log(req.query.school)
+        console.log(req.body)
+        const school = req.query.school
+        const users = await User.find({school: school})
+        res.status(200).json(users)
+
+
+}
+
+
+module.exports = { getUsers, registerUser, authUser, specificUser, currentUserInfo, uploadImage, uploadReq, getAllUsersSpecificSchool}
 

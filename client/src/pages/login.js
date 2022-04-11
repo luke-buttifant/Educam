@@ -58,7 +58,7 @@ const Login = () =>{
     <>
     <div className="grid grid-cols-2">
       <div className="min-w-max min-h-screen"><img className="min-w-max min-h-screen flex" src={loginIllustration}></img></div>
-      <div className="text-white font-sans font-bold mx-auto container bg-white mx-auto text-center">
+      <div className="text-white font-sans font-bold container bg-white mx-auto text-center">
                 <div className="grid grid-rows-6 min-h-screen items-center mx-auto text-center">
                 
                     <div className="row-span-4 row-start-1 col-auto text-black mx-auto">

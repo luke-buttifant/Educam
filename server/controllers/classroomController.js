@@ -19,6 +19,23 @@ const addClassroom = asyncHandler(async (req, res) => {
     }
 })
 
+const addClassroomAdmin = asyncHandler(async (req, res) => {
+    const {students_emails, classroom} = req.body;
+    try{
+        console.log("trying...")
+        console.log(students_emails, classroom)
+        await User.updateMany({email: students_emails},{
+            $push: {classrooms: classroom}
+        } ).then(() =>{
+            res.send("success")
+        })
+    }catch(err){
+        console.log(err);
+        res.send("failed")
+    }
+})
+
+
 
 
 const getClassrooms = asyncHandler(async (req, res) => {
@@ -49,4 +66,4 @@ const editClassroom = asyncHandler(async (req, res) => {
     }
 })
 
-module.exports = { addClassroom, getClassrooms, editClassroom}
+module.exports = { addClassroom,addClassroomAdmin, getClassrooms, editClassroom}
