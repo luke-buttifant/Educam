@@ -11,7 +11,7 @@ const draw = (predictions, ctx) => {
           
           ctx.beginPath();
           ctx.lineWidth = "6";
-          ctx.strokeStyle = "red";
+          ctx.strokeStyle = "#8472FC";
           ctx.rect(start[0], start[1], size[0], size[1]);
           ctx.stroke();
         }

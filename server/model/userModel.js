@@ -4,12 +4,14 @@ const bcrypt = require('bcrypt');
 const classroom = mongoose.Schema([
   {
   event_id: Number,
+  teacher: String,
   title: String,
   start: String,
   end: String,
   room: String,
-  lastClassAttendanceTime: String,
-  totalAttendanceTime: String,
+  lastClassAttendanceTime: {type: String, default: 0},
+  totalAttendanceTime: {type: String, default: 0},
+  students: Array
 }])
 
 const userSchema = mongoose.Schema(

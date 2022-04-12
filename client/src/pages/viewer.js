@@ -16,7 +16,7 @@ import draw from "../utilities";
 import * as tf from '@tensorflow/tfjs'
 import io from 'socket.io-client';
 import ScrollToBottom from 'react-scroll-to-bottom'
-import { useStopwatch, useTimer } from 'react-timer-hook';
+import { useStopwatch } from 'react-timer-hook';
 import { socket } from "../components/socketConnection";
 
 const Viewer = () =>{
@@ -25,7 +25,9 @@ const Viewer = () =>{
   const blazeface = require('@tensorflow-models/blazeface');
   const webcamRef = useRef(null);
   const canvasRef = useRef(null)
-  const [timerRunning, setTimerRunning]= useState(true)
+  const attendanceTime = useRef(null)
+  const attendanceTxt = useRef(null)
+  const [faceDetected, setFaceDetected]= useState(false)
 
   const {
     seconds,
@@ -36,7 +38,7 @@ const Viewer = () =>{
     start,
     pause,
     reset,
-  } = useStopwatch({autoStart: true});
+  } = useStopwatch({autoStart: false});
   
 
   const runFaceDetection = async () =>{
@@ -70,20 +72,13 @@ const Viewer = () =>{
 
       const prediction = await model.estimateFaces(video, returnTensors)
       if(prediction.length > 0){
-        // console.log(prediction)
         setAttendance("Attending");
-        if(!running){
-          start()
-          running = true
-        }
+        setFaceDetected(true)
       }
       else{
         setAttendance("Not attending")
-        if(running){
-          pause()
-          running = false
-        }
-        console.log(timerRunning)
+          setFaceDetected(false)
+          
       }
       
       const ctx = canvasRef.current.getContext("2d");
@@ -119,21 +114,32 @@ const Viewer = () =>{
   window.onload = () => {
     runFaceDetection();
     connectToSFU();
-    start()
+  }
+
+  if(isRunning && !faceDetected){
+    pause();
+  }
+  if(!isRunning && faceDetected){
+    start();
   }
 
   useEffect(() => {
     userAuthenticated();
     connectToSFU();
+    runFaceDetection();
+
+
 
     socket.on("user_joined_room", (room) => {
       if(room == location.state.room){
         connectToSFU()
       }
     })
-    
+
     socket.emit("join_room", location.state.room)
     
+
+
       socket.on("receive_message", (data) => {
         setMessageList((list) => [...list, data])
       });
@@ -193,6 +199,7 @@ const [data, setData] = useState({})
 
 
 function end_call(){
+  socket.emit("leave_room", location.state.room);
   clientState.close();
   navigate('/permissions')
 }
@@ -275,11 +282,12 @@ function end_call(){
           </div>
         
         <div className="col-span-2">
-        <div className="flex flex-col bg-gray-100 px-10">
+        <div className="flex flex-col bg-gray-100 px-10 dark:bg-dark-mode-secondary">
         <div className="font-bold text-secondary">Attendance Statistics</div>
-        <div className="font-light">You are currently: {attending}</div>
         <div className="flex flex-row">
-        <div className="font-light">Attendance time: </div> <div> <span>{days}</span>:<span>{hours}</span>:<span>{minutes}</span>:<span>{seconds}</span></div>
+          <div className="font-light mr-2 dark:text-white">Status: </div><div  className={attending === "Attending" ? "text-secondary font-bold" : "text-red-400 font-bold"}>{attending}</div></div>
+        <div className="flex flex-row">
+        <div className="font-light mr-2 dark:text-white">Attendance time: </div> <div className={attending === "Attending" ? "text-secondary font-bold" : "text-red-400 font-bold"}> <span>{days}</span>:<span>{hours}</span>:<span>{minutes}</span>:<span>{seconds}</span></div>
         </div>
 
         </div>

@@ -66,8 +66,12 @@ const Stream = () =>{
       socket.on("user_connected", () => {
       });
 
-      
+      socket.on("user_left", (room) => {
+        setConnections(connections - 1)
+      })
+
       socket.on("user_disconnected", () => {
+        
         console.log(`User Disconnected`)
       })
     }, [navigate, socket, connections]);

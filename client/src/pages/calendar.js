@@ -6,6 +6,7 @@ import * as ReactDOM from 'react-dom';
 import ClassroomCard from "../components/classroomCards";
 import { Button, Typography } from "@mui/material";
 import {Link, useNavigate} from 'react-router-dom';
+import { math } from "@tensorflow/tfjs";
 
 
 
@@ -59,10 +60,13 @@ const [isAdmin, setIsAdmin] = useState();
       await axios.post("/api/classroom/editClassroom" ,{_id: user.data._id, event_id: event.event_id, title: event.title, start: event.start, end: event.end, room: event.Room_id})
     } else if (action === "create") {
       var students_emails = event.student_id;
-      students_emails.push(user.data.email)
-      
+
+      var event_id = Math.floor(Math.random() * 9999)
       await axios.post("/api/classroom/addClassroomAdmin",{students_emails: students_emails ,classroom: {
-        event_id: Math.floor(Math.random() * 9999), title: event.title, start: event.start, end: event.end,room: event.Room_id}
+        event_id: event_id, title: event.title, teacher: `${user.data.first_name} ${user.data.last_name}`, start: event.start, end: event.end,room: event.Room_id}
+      })
+      await axios.post("/api/classroom/addClassroom",{_id: user.data._id ,classroom: {
+        event_id: event_id, title: event.title, start: event.start, end: event.end,room: event.Room_id, students: students_emails}
       })
       }
       
@@ -136,7 +140,6 @@ const fetchRemote = async () => {
     <Scheduler
         viewerExtraComponent={(fields, event) => {
           var room = event.room
-          console.log(event.room)
           return (
                         <div className="text-center mt-2">
                           
