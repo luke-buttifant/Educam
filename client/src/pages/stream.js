@@ -14,7 +14,7 @@ import { Client, LocalStream } from 'ion-sdk-js';
 import { IonSFUJSONRPCSignal } from 'ion-sdk-js/lib/signal/json-rpc-impl';
 import {useLocation} from 'react-router-dom';
 import io from 'socket.io-client';
-const socket = io.connect("http://localhost:3001");
+import { socket } from "../components/socketConnection";
 
 
 const Stream = () =>{
@@ -24,27 +24,17 @@ const Stream = () =>{
   const chatRoom = useRef();
   const input = useRef();
   const [clientState, setClientState] = useState()
-  const [local, setLocal] = useState()
   const [connections, setConnections] = useState(0)
-  const [once, setOnce] = useState(false)
-
-  const [room, setRoom] = useState("");
    // Messages States
  const [message, setMessage] = useState("");
  const [picture, setPicture] = useState()
  const [firstName, setFirstName] = useState()
  const [messageList, setMessageList] = useState([]);
 
-   console.log(location.state);
 
-  const joinRoom = () => {
-    if (room !== "") {
-      socket.emit("join_room", location.state);
-    }
-  };
 
   const sendMessage = async () => {
-    const messageData = { message: message, picture: picture, firstName: firstName, time: new Date(Date.now()).getHours() + ":" + new Date(Date.now()).getMinutes()}
+    const messageData = { message: message, picture: picture, firstName: firstName, time: new Date(Date.now()).getHours() + ":" + new Date(Date.now()).getMinutes(), room: location.state.room}
     socket.emit("send_message", messageData );
     setMessageList((list) => [...list, messageData])
     input.current.value = '';
@@ -52,23 +42,33 @@ const Stream = () =>{
 
   window.onload = () => {
     userAuthenticated();
+    connectToSFU();
+    
   }
 
   useEffect(() => {
-    connectToSFU();
-    setOnce(true)
-      // joinRoom();
-      socket.on("receive_message", (data) => {
-        setMessageList((list) => [...list, data])
+    userAuthenticated();
+    connectToSFU()
 
+      socket.off("receive_message").on("receive_message", (data) => {
+        setMessageList((list) => [...list, data])
       });
+
+      socket.on("user_joined_room", (room) => {
+        if(room == location.state.room){
+          setConnections(connections + 1)
+        }
+      })
+
+      socket.emit("join_room", location.state.room)
       socket.on("user_connected", () => {
+        connectToSFU()
         
       });
       socket.on("user_disconnected", () => {
         console.log(`User Disconnected`)
       })
-    }, [navigate, socket]);
+    }, [navigate, socket, connections]);
    
 
 const [data, setData] = useState({})
@@ -103,7 +103,7 @@ const [data, setData] = useState({})
     client = new Client(signal, config);
     setClientState(client);
 
-    signal.onopen = () => client.join(location.state);
+    signal.onopen = () => client.join(location.state.room);
     
    LocalStream.getUserMedia({
       resolution: 'vga',
@@ -121,7 +121,7 @@ const [data, setData] = useState({})
 
   function endCall(){
     clientState.close();
-    socket.emit("end_call");
+    socket.emit("end_call", {room: location.state.room});
     navigate('/permissions')
   }
 
@@ -129,8 +129,6 @@ const [data, setData] = useState({})
 
   return (
       <>
-      <h1>Users Connected: {connections}</h1>
-      <div>Room: {location.state}</div>
       <div className="grid grid-cols-3">
       <div className="col-span-2 mt-32 mx-5">
         <div><video autoPlay={true} id="videoElement" ref={pubVideo} className='rounded-lg shadow-lg min-w-[100%]'></video>
@@ -148,9 +146,8 @@ const [data, setData] = useState({})
         <div className="rounded-lg min-w-max shadow-lg max-h-[90vh] min-h-[90vh]">
         <div className="chat h-[100%] bg-white dark:bg-dark-mode-secondary relative noScrollBar">
             <div className="grid grid-cols-3 items-center">
-            <div className=" col-span-2 mt-10"><h1 className="font-bold text-xl text-gray-400 ml-10 text-center">Dissertation - COM616</h1></div>
-            <div className="text-secondary mx-auto mt-10"><BsFillPlusCircleFill size={50}/></div>
-
+            <div className=" col-span-2 mt-6"><h1 className="font-bold text-xl text-gray-400 ml-10">{location.state.title}</h1></div>
+            <div className="text-secondary mx-auto mt-6"><BsFillPlusCircleFill size={50}/></div>
             </div>
             <div className="items-center mt-2">
                 <h2 className="mx-auto text-center font-bold text-secondary mb-2">CHAT</h2>
@@ -160,13 +157,20 @@ const [data, setData] = useState({})
             <div id="chat-room" ref={chatRoom} className="flex flex-col divide-y">
               {messageList.map((messageContent) => {
                 return(
-                  <ChatMessage dp={messageContent.picture} name={messageContent.firstName} message={messageContent.message} time={messageContent.time} />
+                  <ChatMessage key={messageContent} dp={messageContent.picture} name={messageContent.firstName} message={messageContent.message} time={messageContent.time} />
                 )
               })}
             </div>
             </div>
+        </div>
+        <div className="col-span-2">
+        <div className="flex flex-col bg-gray-100 px-10">
+        <div className="font-bold text-secondary">Attendance Statistics</div>
+        <div className="font-light">Users connected:  {connections}</div>
+        <div className="flex flex-row">
+        </div>
 
-
+        </div>
 
         </div>
         <div className="justify-center flex  w-[100%] mx-auto bg-white dark:bg-dark-mode-secondary">
@@ -174,13 +178,8 @@ const [data, setData] = useState({})
                   setMessage(event.target.value)}} ></input>
                 <button onClick={sendMessage} className="p-2 dark:text-white"><BiSend size={38}/></button>
                 </div>
-
-
         </div>
-
         </div>
-
-
     </>
   );
 }

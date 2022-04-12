@@ -11,7 +11,7 @@ const io = new Server(server, {
   cors: {
     origin: "http://localhost:3000",
     methods: ["GET", "POST"]
-  }
+  },
 })
 
 const {v4: uuidV4} = require('uuid')
@@ -52,19 +52,21 @@ app.get("/api", (req, res) => {
     socket.on("disconnect", () => {
       socket.broadcast.emit("user_disconnected")
     })
-  
+
+
     socket.on("join_room", (data) => {
       socket.join(data);
       console.log(`joined room: ${data}`)
+      socket.to(data).emit("user_joined_room", data);
     });
   
     socket.on("send_message", (data) => {
-      socket.broadcast.emit("receive_message", data);
-      console.log(data)
+      socket.to(data.room).emit("receive_message", data);
+      console.log(data.room)
     });
 
-    socket.on("end_call", () => {
-      socket.broadcast.emit("close_meeting");
+    socket.on("end_call", (data) => {
+      socket.to(data.room).emit("close_meeting");
       console.log("meeting ended")
     })
   });

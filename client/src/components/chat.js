@@ -12,7 +12,7 @@ const ChatMessage = ({dp, name, message, time}) => {
           <div className="message dark:text-white max-w-[100px]"><div className='max-w-max'>{message}</div></div>
         </div>
    </div>
-   <div className="col-span-1 mt-10 text-gray-400">
+   <div className="col-span-1 mt-10 text-gray-400 float-right ml-10">
        {time}
    </div>
 </div>

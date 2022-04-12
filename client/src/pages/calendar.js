@@ -26,13 +26,11 @@ const Calendar = () =>{
 const [data, setData] = useState([{title: "fetching...", time: "fetching..."}])
 const [users, setUsers] = useState({})
 const [isAdmin, setIsAdmin] = useState();
-const classroomList = useRef();
 
   const userAuthenticated = async () => {
       await axios.get("/api/users/currentUser", {headers: {
       "x-access-token": localStorage.getItem("jwt")
     }}).then((response) => {
-      classroomList.current.innerHtml += "Hello"
       setData(response.data)
       if(response.data.is_teacher === true){
         setIsAdmin(true)
@@ -143,7 +141,7 @@ const fetchRemote = async () => {
                         <div className="text-center mt-2">
                           
                           <Link key={Math.random() * 9999} to={"/viewer"}
-        state={room}
+        state={{room:room, title: event.title}}
     ><Button key={Math.random() * 9999} variant="contained">Join Classroom</Button></Link>
                         </div>
                       );
@@ -201,7 +199,7 @@ const AdminCalendar = (users) =>{
                   return (
                     <div className="text-center mt-2">
                       <Link key={i} to={"/stream"}
-    state={room}
+    state={{room:event.room, title: event.title}}
 ><Button key={i} variant="contained">Join Classroom</Button></Link>
                     </div>
                   );

@@ -17,8 +17,7 @@ import * as tf from '@tensorflow/tfjs'
 import io from 'socket.io-client';
 import ScrollToBottom from 'react-scroll-to-bottom'
 import { useStopwatch, useTimer } from 'react-timer-hook';
-const socket = io.connect("http://localhost:3001");
-
+import { socket } from "../components/socketConnection";
 
 const Viewer = () =>{
   
@@ -93,41 +92,32 @@ const Viewer = () =>{
   }
 
 
- //Room State
- const [room, setRoom] = useState("");
+ 
  const [attending, setAttendance] = useState("calculating...")
 
  // Messages States
  const [message, setMessage] = useState("");
  const [picture, setPicture] = useState("")
  const [firstName, setFirstName] = useState("")
- const [messageReceived, setMessageReceived] = useState("");
- const [pictureReceived, setPictureReceived] = useState()
- const [firstNameReceived, setFirstNameReceived] = useState()
  const [messageList, setMessageList] = useState([]);
+ const [gotTrack, SetGotTrack] = useState([]);
+ const [clientState, setClientState] = useState()
 
   var time = useRef()
 
-  // const joinRoom = () => {
-  //   if (room !== "") {
-  //     socket.emit("join_room", localStorage.getItem("room"));
-  //   }
-  // };
-
   const sendMessage = () => {
-    const messageData = { message: message, picture: picture, firstName: firstName, time: new Date(Date.now()).getHours() + ":" + new Date(Date.now()).getMinutes()}
-    socket.emit("send_message", messageData);
+    const messageData = { message: message, picture: picture, firstName: firstName, time: new Date(Date.now()).getHours() + ":" + new Date(Date.now()).getMinutes(), room: location.state.room}
+    socket.emit("send_message", messageData );
     setMessageList((list) => [...list, messageData])
   };
 
-  function startTimer(){
-    setInterval()
-  }
+
   let navigate = useNavigate()
   const subVideo = useRef();
   
 
   window.onload = () => {
+    
     userAuthenticated();
     connectToSFU();
     runFaceDetection();
@@ -135,8 +125,15 @@ const Viewer = () =>{
   }
 
   useEffect(() => {
+    connectToSFU();
+    userAuthenticated();
+    runFaceDetection();
+
+    socket.on("user_connected", () => {
+      connectToSFU()
+    });
+    socket.emit("join_room", location.state.room)
     
-      // joinRoom();
       socket.on("receive_message", (data) => {
         setMessageList((list) => [...list, data])
       });
@@ -177,10 +174,11 @@ const [data, setData] = useState({})
   function connectToSFU(){
     signal = new IonSFUJSONRPCSignal("wss://test.bestwebrtc.co.uk/ws");
     client = new Client(signal, config);
-    signal.onopen = () => client.join(location.state);
-    
+    signal.onopen = () => client.join(location.state.room);
+    setClientState(client)
     client.ontrack = (track, stream) => {
         console.log("got track: ", track.id, "for stream: ", stream.id);
+        SetGotTrack(true)
         track.onunmute = () => {
           subVideo.current.srcObject = stream;
           subVideo.current.autoplay = true;
@@ -195,6 +193,7 @@ const [data, setData] = useState({})
 
 
 function end_call(){
+  clientState.close();
   navigate('/permissions')
 }
 
@@ -202,8 +201,6 @@ function end_call(){
 
   return (
       <>
-            <div>Room: {location.state}</div>
-            <p>{isRunning ? 'Running' : 'Not running'}</p>
       <div className="grid grid-cols-3">
       <div className="col-span-2 mt-32 mx-5">
         <div><video autoPlay={true} id="videoElement" controls ref={subVideo} className='rounded-lg shadow-lg min-w-[100%]'></video>
@@ -222,7 +219,7 @@ function end_call(){
         <div className="rounded-lg min-w-max shadow-lg max-h-[90vh] min-h-[90vh]">
         <div className="chat min-h-[80vh] max-h-[80vh] bg-white dark:bg-dark-mode-secondary relative noScrollBar">
             <div className="grid grid-cols-3 items-center">
-            <div className=" col-span-2 mt-10"><h1 className="font-bold text-xl text-gray-400 ml-10 text-center">Dissertation - COM616</h1></div>
+            <div className=" col-span-2 mt-10"><h1 className="font-bold text-xl text-gray-400 ml-10">{location.state.title}</h1></div>
             <div className="text-secondary mx-auto mt-10"><BsFillPlusCircleFill size={50}/></div>
 
             </div>
@@ -230,17 +227,20 @@ function end_call(){
                 <h2 className="mx-auto text-center font-bold text-secondary mb-2">CHAT</h2>
                 <div className="w-full border-t border-4 border-secondary"></div>
             </div>
-            <div className="max-h-[60vh] min-h-[60vh] overflow-auto noScrollBar">
-            <div className="flex flex-col divide-y message-container">
-              <ScrollToBottom className="message-container">
+            <ScrollToBottom className="message-container">
+            <div className="max-h-[60vh] min-h-[60vh] overflow-auto noScrollBar message-container">
+            <div className="flex flex-col divide-y ">
+              
             {messageList.map((messageContent) => {
                 return(
-                  <ChatMessage dp={messageContent.picture} name={messageContent.firstName} message={messageContent.message} time={messageContent.time} />
+                  <ChatMessage key={messageContent} dp={messageContent.picture} name={messageContent.firstName} message={messageContent.message} time={messageContent.time} />
                 )
               })}
-              </ScrollToBottom>
+              
             </div>
+            
             </div>
+            </ScrollToBottom>
 
 
 
