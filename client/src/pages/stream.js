@@ -47,24 +47,26 @@ const Stream = () =>{
   }
 
   useEffect(() => {
+    connectToSFU();
     userAuthenticated();
-    connectToSFU()
 
-      socket.off("receive_message").on("receive_message", (data) => {
+
+      socket.off().on("receive_message", (data) => {
         setMessageList((list) => [...list, data])
       });
 
       socket.on("user_joined_room", (room) => {
         if(room == location.state.room){
+          connectToSFU()
           setConnections(connections + 1)
         }
       })
 
       socket.emit("join_room", location.state.room)
       socket.on("user_connected", () => {
-        connectToSFU()
-        
       });
+
+      
       socket.on("user_disconnected", () => {
         console.log(`User Disconnected`)
       })

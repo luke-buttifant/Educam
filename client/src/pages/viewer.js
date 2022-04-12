@@ -117,21 +117,21 @@ const Viewer = () =>{
   
 
   window.onload = () => {
-    
-    userAuthenticated();
-    connectToSFU();
     runFaceDetection();
+    connectToSFU();
     start()
   }
 
   useEffect(() => {
-    connectToSFU();
     userAuthenticated();
-    runFaceDetection();
+    connectToSFU();
 
-    socket.on("user_connected", () => {
-      connectToSFU()
-    });
+    socket.on("user_joined_room", (room) => {
+      if(room == location.state.room){
+        connectToSFU()
+      }
+    })
+    
     socket.emit("join_room", location.state.room)
     
       socket.on("receive_message", (data) => {
