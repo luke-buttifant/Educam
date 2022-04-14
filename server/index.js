@@ -64,7 +64,16 @@ app.get("/api", (req, res) => {
       socket.to(data).emit("user_left");
       console.log(`${data.id}: left the room`)
     })
+
+    socket.on("send_statistics", (data) => {
+      socket.to(data.room).emit("user_sent_stats", {email: data.email, hours: data.hours, minutes: data.minutes, seconds: data.seconds, event_id: data.event_id});
+      console.log(data)
+    })
   
+    socket.on("send_meeting_stats", (data) => {
+      socket.to(data.room).emit("user_sent_stats", {email: data.email, hours: data.hours, minutes: data.minutes, seconds: data.seconds, event_id: data.event_id});
+    })
+
     socket.on("send_message", (data) => {
       socket.to(data.room).emit("receive_message", data);
       console.log(data.room)

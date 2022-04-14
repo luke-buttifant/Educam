@@ -15,7 +15,7 @@ import { IonSFUJSONRPCSignal } from 'ion-sdk-js/lib/signal/json-rpc-impl';
 import {useLocation} from 'react-router-dom';
 import io from 'socket.io-client';
 import { socket } from "../components/socketConnection";
-
+import { DataGrid} from '@mui/x-data-grid';
 
 const Stream = () =>{
   const location = useLocation();
@@ -23,6 +23,8 @@ const Stream = () =>{
   const pubVideo = useRef();
   const chatRoom = useRef();
   const input = useRef();
+  const attendanceGrid = useRef();
+  const videoDiv = useRef();
   const [clientState, setClientState] = useState()
   const [connections, setConnections] = useState(0)
    // Messages States
@@ -30,6 +32,7 @@ const Stream = () =>{
  const [picture, setPicture] = useState()
  const [firstName, setFirstName] = useState()
  const [messageList, setMessageList] = useState([]);
+ const [userStats, setUserStats] = useState([])
 
 
 
@@ -43,7 +46,6 @@ const Stream = () =>{
   window.onload = () => {
     userAuthenticated();
     connectToSFU();
-    
   }
 
   useEffect(() => {
@@ -69,6 +71,14 @@ const Stream = () =>{
       socket.on("user_left", (room) => {
         setConnections(connections - 1)
       })
+
+      
+      socket.on("user_sent_stats", (data) => {
+        setUserStats((stats) => [...stats, data])
+        rows.push({id: data.email, hours: data.hours, minutes: data.minutes, seconds: data.seconds})
+      })
+
+
 
       socket.on("user_disconnected", () => {
         
@@ -128,15 +138,66 @@ const [data, setData] = useState({})
   function endCall(){
     clientState.close();
     socket.emit("end_call", {room: location.state.room});
-    navigate('/permissions')
+    document.getElementById("videoDiv").classList.add("hidden")
+    document.getElementById("attendanceGrid").classList.remove("hidden")
+
+    // navigate('/permissions')
   }
 
 
 
+
+  const columns = [
+    { field: 'id', headerName: 'Email', width: 90 },
+    {
+      field: 'hours',
+      headerName: 'Hours',
+      width: 150,
+      editable: true,
+    },
+    {
+      field: 'minutes',
+      headerName: 'Minutes',
+      type: 'number',
+      width: 110,
+      editable: true,
+    },
+    {
+      field: 'seconds',
+      headerName: 'Seconds',
+      type: 'number',
+      width: 110,
+      editable: true,
+    },
+  ];
+  
+  var rows = [];
+
+  
   return (
       <>
+      <h1>USER STATS: </h1>{userStats.map((stats) => {
+                return(
+                  <h1> {stats.email} {stats.time} </h1>
+                )
+              })}
       <div className="grid grid-cols-3">
-      <div className="col-span-2 mt-32 mx-5">
+        <div className="col-span-2 hidden">
+          <div id="attendanceGrid" className="grid">
+              <div className="text-center">Attendance Statistics</div>
+              <div style={{ height: 400, width: '100%' }}>
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        pageSize={5}
+        rowsPerPageOptions={[5]}
+        checkboxSelection
+        disableSelectionOnClick
+      />
+    </div>
+          </div>
+        </div>
+      <div id="videoDiv" className="col-span-2 mt-32 mx-5">
         <div><video autoPlay={true} id="videoElement" ref={pubVideo} className='rounded-lg shadow-lg min-w-[100%]'></video>
         <div className="max-w-[80%] mx-auto">
         <div className="container mt-5 flex flex-row mx-auto">

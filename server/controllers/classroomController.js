@@ -19,6 +19,7 @@ const addClassroom = asyncHandler(async (req, res) => {
     }
 })
 
+
 const addClassroomAdmin = asyncHandler(async (req, res) => {
     const {students_emails, classroom} = req.body;
     try{
@@ -66,4 +67,40 @@ const editClassroom = asyncHandler(async (req, res) => {
     }
 })
 
-module.exports = { addClassroom,addClassroomAdmin, getClassrooms, editClassroom}
+const updateAttendance = asyncHandler(async (req, res) => {
+    var {userEmails, hours, minutes, seconds, event_id} = req.body;
+    try{
+        for (let i = 0; i < userEmails.length; i++){
+            
+            var newHours = hours[i] * 3600
+            var newMinutes = minutes[i] * 60
+            var newSeconds = seconds[i]
+            var time = newHours + newMinutes + newSeconds
+
+            var user = await User.findOne({email: userEmails[i], "classrooms.event_id": event_id})
+            for(let i = 0; i < user.classrooms.length; i++){
+                if(user.classrooms[i].event_id == event_id){
+                    var totalAttendance = user.classrooms[i].totalAttendanceTime
+                }
+            }
+            totalAttendance = totalAttendance + time
+
+            await User.findOneAndUpdate({email: userEmails[i], "classrooms.event_id": event_id}, {
+                "$set":{
+                    "classrooms.$.lastClassAttendanceTime": time,
+                    "classrooms.$.totalAttendanceTime": totalAttendance
+                }
+            })
+
+            console.log(`Updated ${userEmails[i]} attendance statistics`)
+        }
+        
+        res.send("success")
+    }
+    catch(err){
+        console.log(err)
+        res.send("fail")
+    }
+})
+
+module.exports = { addClassroom,addClassroomAdmin, getClassrooms, editClassroom, updateAttendance}

@@ -65,10 +65,16 @@ const [isAdmin, setIsAdmin] = useState();
       await axios.post("/api/classroom/addClassroomAdmin",{students_emails: students_emails ,classroom: {
         event_id: event_id, title: event.title, teacher: `${user.data.first_name} ${user.data.last_name}`, start: event.start, end: event.end,room: event.Room_id}
       })
+
+      var students = []
+      for(let i = 0; i < students_emails.length; i++){
+        students.push({name: students_emails[i]})
+      }
       await axios.post("/api/classroom/addClassroom",{_id: user.data._id ,classroom: {
-        event_id: event_id, title: event.title, start: event.start, end: event.end,room: event.Room_id, students: students_emails}
+        event_id: event_id, title: event.title, start: event.start, end: event.end,room: event.Room_id, students: students}
       })
       }
+
       
       return new Promise((res, rej) => {
           res({
@@ -89,6 +95,8 @@ const [isAdmin, setIsAdmin] = useState();
       await axios.post("/api/classroom/addClassroom",{_id: user.data._id ,classroom: {
         event_id: Math.floor(Math.random() * 9999), title: event.title, start: event.start, end: event.end,room: event.Room_id}
       })
+
+
       }
       
       return new Promise((res, rej) => {
@@ -144,7 +152,7 @@ const fetchRemote = async () => {
                         <div className="text-center mt-2">
                           
                           <Link key={Math.random() * 9999} to={"/viewer"}
-        state={{room:room, title: event.title}}
+        state={{room:room, title: event.title, event_id: event.event_id}}
     ><Button key={Math.random() * 9999} variant="contained">Join Classroom</Button></Link>
                         </div>
                       );
@@ -202,7 +210,7 @@ const AdminCalendar = (users) =>{
                   return (
                     <div className="text-center mt-2">
                       <Link key={i} to={"/stream"}
-    state={{room:event.room, title: event.title}}
+    state={{room:event.room, title: event.title, event: event.event_id}}
 ><Button key={i} variant="contained">Join Classroom</Button></Link>
                     </div>
                   );

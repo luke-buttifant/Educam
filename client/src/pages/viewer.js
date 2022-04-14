@@ -138,14 +138,21 @@ const Viewer = () =>{
 
     socket.emit("join_room", location.state.room)
     
-
-
       socket.on("receive_message", (data) => {
         setMessageList((list) => [...list, data])
       });
-      socket.on("close_meeting", () => {
+      socket.on("close_meeting", async () => {
+        var user = await axios.get("/api/users/currentUser", {headers: {
+          "x-access-token": localStorage.getItem("jwt")
+        }})
+        var hours = document.getElementById("hours").innerHTML;
+        var minutes = document.getElementById("minutes").innerHTML;
+        var seconds = document.getElementById("seconds").innerHTML;
+        var stats = {email: user.data.email, hours: hours, minutes: minutes, seconds: seconds, room: location.state.room, event_id: location.state.event_id}
+        console.log(stats)
+        socket.emit("send_meeting_stats", stats)
         alert("Meeting Over!")
-        navigate('/permissions')
+        // navigate('/permissions')
       });
     }, [navigate, socket]);
    
@@ -200,6 +207,9 @@ const [data, setData] = useState({})
 
 function end_call(){
   socket.emit("leave_room", location.state.room);
+  var stats = {email: data.email, time: `${hours}:${minutes}:${seconds}`, room: location.state.room, event_id: location.state.event_id}
+  socket.emit("send_statistics", stats)
+
   clientState.close();
   navigate('/permissions')
 }
@@ -287,7 +297,7 @@ function end_call(){
         <div className="flex flex-row">
           <div className="font-light mr-2 dark:text-white">Status: </div><div  className={attending === "Attending" ? "text-secondary font-bold" : "text-red-400 font-bold"}>{attending}</div></div>
         <div className="flex flex-row">
-        <div className="font-light mr-2 dark:text-white">Attendance time: </div> <div className={attending === "Attending" ? "text-secondary font-bold" : "text-red-400 font-bold"}> <span>{days}</span>:<span>{hours}</span>:<span>{minutes}</span>:<span>{seconds}</span></div>
+        <div className="font-light mr-2 dark:text-white">Attendance time: </div> <div ref={attendanceTime}  className={attending === "Attending" ? "text-secondary font-bold" : "text-red-400 font-bold"}><span id="hours">{hours}</span>:<span id="minutes">{minutes}</span>:<span id="seconds">{seconds}</span></div>
         </div>
 
         </div>
