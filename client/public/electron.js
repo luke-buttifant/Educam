@@ -12,7 +12,7 @@ function createWindow() {
     minHeight: 775,
     minWidth: 1300,
     autoHideMenuBar: true,
-    icon: __dirname + '/images/Logo.ico',
+    icon: __dirname + './images/Logo.ico',
     webPreferences: {
       nodeIntegration: true,
     },

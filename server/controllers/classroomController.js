@@ -68,7 +68,8 @@ const editClassroom = asyncHandler(async (req, res) => {
 })
 
 const updateAttendance = asyncHandler(async (req, res) => {
-    var {userEmails, hours, minutes, seconds, event_id} = req.body;
+    console.log("attemping...")
+    var {_id, userEmails, hours, minutes, seconds, event_id} = req.body;
     try{
         for (let i = 0; i < userEmails.length; i++){
             
@@ -92,14 +93,21 @@ const updateAttendance = asyncHandler(async (req, res) => {
                 }
             })
 
+            await User.findOneAndUpdate({_id: _id},{"$set":{ "classrooms.$[e].students.$[n].lastClassAttendanceTime": time, "classrooms.$[e].students.$[n].totalAttendanceTime": totalAttendance}},{
+                arrayFilters: [
+                    { "e.event_id": event_id},
+                    {"n.name": userEmails[i]}
+                ]
+               })
+
+
             console.log(`Updated ${userEmails[i]} attendance statistics`)
-        }
-        
+        }        
         res.send("success")
     }
     catch(err){
         console.log(err)
-        res.send("fail")
+        res.send("failed to update attendance statistics")
     }
 })
 

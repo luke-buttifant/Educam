@@ -38,7 +38,7 @@ const Register = () =>{
           
       const userInfo = localStorage.getItem("jwt");
       if (userInfo){
-          navigate("/")
+          navigate("/login")
       }
   }, [navigate])
 
@@ -65,7 +65,7 @@ const Register = () =>{
                     {first_name, last_name, email, password, gender, dob, school}
                 ).then((response) => {
                     localStorage.setItem('jwt', response.data.token);
-                    navigate("/")
+                    navigate("/login")
                     setLoading(false)
                 })
                 

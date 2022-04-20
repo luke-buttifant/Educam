@@ -16,13 +16,13 @@ const Login = () =>{
 
     let navigate = useNavigate()
 
+
 	useEffect(() =>{
-		  
 	  const userInfo = localStorage.getItem("jwt");
 	  if (userInfo){
-		  navigate("/")
+		  navigate("/permissions")
 	  }
-  }, [navigate])
+  })
 
 
 
@@ -42,7 +42,7 @@ const Login = () =>{
                 email, password
             }, config).then((response) => {
                 localStorage.setItem('jwt', response.data.token);
-                navigate("/")
+                navigate("/login")
                 setLoading(false)
             })
 

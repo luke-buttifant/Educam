@@ -207,7 +207,7 @@ const [data, setData] = useState({})
 
 function end_call(){
   socket.emit("leave_room", location.state.room);
-  var stats = {email: data.email, time: `${hours}:${minutes}:${seconds}`, room: location.state.room, event_id: location.state.event_id}
+  var stats = {email: data.email, hours: hours, minutes:minutes, seconds: seconds, room: location.state.room, event_id: location.state.event_id}
   socket.emit("send_statistics", stats)
 
   clientState.close();

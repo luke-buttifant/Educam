@@ -16,6 +16,7 @@ import {useLocation} from 'react-router-dom';
 import io from 'socket.io-client';
 import { socket } from "../components/socketConnection";
 import { DataGrid} from '@mui/x-data-grid';
+import { useStopwatch } from 'react-timer-hook';
 
 const Stream = () =>{
   const location = useLocation();
@@ -34,6 +35,16 @@ const Stream = () =>{
  const [messageList, setMessageList] = useState([]);
  const [userStats, setUserStats] = useState([])
 
+ var {
+  seconds,
+  minutes,
+  hours,
+  days,
+  isRunning,
+  start,
+  pause,
+  reset,
+} = useStopwatch({autoStart: true});
 
 
   const sendMessage = async () => {
@@ -47,6 +58,15 @@ const Stream = () =>{
     userAuthenticated();
     connectToSFU();
   }
+
+  useEffect(() => {
+    var time = window.localStorage.getItem("meetingTime")
+    console.log(JSON.parse(time))
+  }, [])
+
+  useEffect(() => {
+    window.localStorage.setItem("meetingTime", JSON.stringify({hours: hours, minutes: minutes, seconds: seconds}))
+  }, [hours, minutes, seconds])
 
   useEffect(() => {
     connectToSFU();
@@ -74,8 +94,9 @@ const Stream = () =>{
 
       
       socket.on("user_sent_stats", (data) => {
-        setUserStats((stats) => [...stats, data])
-        rows.push({id: data.email, hours: data.hours, minutes: data.minutes, seconds: data.seconds})
+        var seconds = data.seconds + (data.minutes * 60) + (data.hours * 3600)
+
+        setUserStats((stats) => [...stats, {id: data.email, hours: data.hours, minutes: data.minutes, seconds: data.seconds}])
       })
 
 
@@ -139,63 +160,93 @@ const [data, setData] = useState({})
     clientState.close();
     socket.emit("end_call", {room: location.state.room});
     document.getElementById("videoDiv").classList.add("hidden")
-    document.getElementById("attendanceGrid").classList.remove("hidden")
+    document.getElementById("attendanceGrid").classList.remove("hidden") 
+    document.getElementById("chat").classList.add("hidden")
+    pause();
+    console.log(seconds,minutes,hours)
+  }
 
-    // navigate('/permissions')
+  async function updateAttendance(stats){
+    
+    console.log(stats)
+    var emails = []
+    var hours = []
+    var minutes = []
+    var seconds = []
+    for(let i = 0; i < stats.length; i++){
+      emails.push(stats[i].id)
+      hours.push(stats[i].hours)
+      minutes.push(stats[i].minutes)
+      seconds.push(stats[i].seconds)
+    }
+    await axios.post("/api/classroom/updateAttendance", {_id: data._id,userEmails: emails, hours: hours, minutes: minutes, seconds: seconds, event_id: location.state.event_id}).then((res) => {
+      console.log(res)
+      if(res.data === "success"){
+        alert("succesfully updated attendance!")
+        navigate('/permissions')
+      }
+      else{
+        alert("error, please try again.")
+      }
+    })
   }
 
 
 
 
   const columns = [
-    { field: 'id', headerName: 'Email', width: 90 },
+    { field: 'id', headerName: 'Email', width: 250,},
     {
       field: 'hours',
       headerName: 'Hours',
-      width: 150,
+      type: 'number',
+      width: 200,
       editable: true,
     },
     {
       field: 'minutes',
       headerName: 'Minutes',
       type: 'number',
-      width: 110,
+      width: 200,
       editable: true,
     },
     {
       field: 'seconds',
       headerName: 'Seconds',
       type: 'number',
-      width: 110,
+      width: 200,
+      editable: true,
+    },
+    {
+      field: 'status',
+      headerName: 'Status',
+      type: 'string',
+      width: 200,
       editable: true,
     },
   ];
   
-  var rows = [];
 
   
   return (
       <>
-      <h1>USER STATS: </h1>{userStats.map((stats) => {
-                return(
-                  <h1> {stats.email} {stats.time} </h1>
-                )
-              })}
+      {/* <h1>Meeting time: {hours},{minutes}, {seconds}</h1> */}
       <div className="grid grid-cols-3">
-        <div className="col-span-2 hidden">
-          <div id="attendanceGrid" className="grid">
-              <div className="text-center">Attendance Statistics</div>
+        <div id="attendanceGrid" className="col-span-3 hidden">
+          <div  className="grid bg-white mt-10 rounded-lg p-10 mx-10">
+              <div className="text-center font-bold text-2xl mb-5">Attendance Statistics</div>
               <div style={{ height: 400, width: '100%' }}>
       <DataGrid
-        rows={rows}
+        rows={userStats}
         columns={columns}
         pageSize={5}
         rowsPerPageOptions={[5]}
-        checkboxSelection
         disableSelectionOnClick
       />
     </div>
+    <button className="px-10 py-2 bg-secondary text-center mx-auto rounded-lg mt-10 text-white hover:opacity-80" onClick={() => updateAttendance(userStats)}>Submit</button>
           </div>
+          
         </div>
       <div id="videoDiv" className="col-span-2 mt-32 mx-5">
         <div><video autoPlay={true} id="videoElement" ref={pubVideo} className='rounded-lg shadow-lg min-w-[100%]'></video>
@@ -210,7 +261,7 @@ const [data, setData] = useState({})
         </div>
         </div>
         </div>
-        <div className="rounded-lg min-w-max shadow-lg max-h-[90vh] min-h-[90vh]">
+        <div id="chat" className="rounded-lg min-w-max shadow-lg max-h-[90vh] min-h-[90vh]">
         <div className="chat h-[100%] bg-white dark:bg-dark-mode-secondary relative noScrollBar">
             <div className="grid grid-cols-3 items-center">
             <div className=" col-span-2 mt-6"><h1 className="font-bold text-xl text-gray-400 ml-10">{location.state.title}</h1></div>

@@ -4,7 +4,7 @@ import NavBar from "./components/navbar"
 import Profile from "./pages/profile"
 import Login from './pages/login'
 import Register from "./pages/register"
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Calendar from './pages/calendar'
 import Stream from "./pages/stream"
 import Permissions from './pages/permissionBarrier'
@@ -40,7 +40,7 @@ function App() {
 					<Route path='/register' element={<Register />}/>
 					<Route path='/calendar' element={<Calendar />}/>
 					<Route path='/viewer' element={<Viewer />}/>
-					
+					<Route path="/" element={<Navigate replace to="/login" />}/>
 
 				</Routes>
 			</Router>

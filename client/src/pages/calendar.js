@@ -206,11 +206,10 @@ const AdminCalendar = (users) =>{
 <div>
               {fields.map((field, i) => {
                 if (field.name === "Room_id") {
-                  const room = event.room
                   return (
                     <div className="text-center mt-2">
                       <Link key={i} to={"/stream"}
-    state={{room:event.room, title: event.title, event: event.event_id}}
+    state={{room:event.room, title: event.title, event_id: event.event_id}}
 ><Button key={i} variant="contained">Join Classroom</Button></Link>
                     </div>
                   );
