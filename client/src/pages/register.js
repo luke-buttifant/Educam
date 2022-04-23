@@ -31,6 +31,7 @@ const Register = () =>{
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState(null)
     const [value, setValue] = useState();
+    const [agree, setAgree] = useState(false);
 
     let navigate = useNavigate()
 
@@ -41,6 +42,10 @@ const Register = () =>{
           navigate("/login")
       }
   }, [navigate])
+
+  const checkboxHandler = () => {
+    setAgree(!agree);
+  }
 
     const submitHandler = async (e) => {
         e.preventDefault();
@@ -191,9 +196,11 @@ const Register = () =>{
                     <div className="text-sm font-sans font-medium w-full pr-20 pt-5 text-center">
                     {error &&<ErrorMessage>{error}</ErrorMessage>}
                     {message &&<ErrorMessage>{message}</ErrorMessage>}
-                    <button 
+                    <input className="mb-2" type="checkbox" id="agree" onChange={checkboxHandler} />
+                    <label htmlFor="agree"> I agree to <b><a href="/terms">terms and conditions</a></b></label>
+                    <button disabled={true}
                                 type="submit"   
-                                className="text-center w-full py-4 bg-secondary hover:bg-dark-mode  text-white shadow-lg rounded-2xl mx-auto font-bold ">
+                                className={!agree ? "text-center w-full py-4 bg-gray-200 opacity-75  text-white shadow-lg rounded-2xl mx-auto font-bold " : "text-center w-full py-4 bg-secondary hover:bg-dark-mode  text-white shadow-lg rounded-2xl mx-auto font-bold cursor-pointer" }>
                                     <div className="flex flex-row items-center">
                                         <div className="mx-auto flex">
                                         <div className="text-center">Register</div>{loading && <Spinner />}

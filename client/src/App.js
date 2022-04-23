@@ -11,6 +11,7 @@ import Permissions from './pages/permissionBarrier'
 import StudentDashboard from "./pages/StudentDashboard"
 import TeacherDashboard from "./pages/TeacherDashboard"
 import Viewer from "./pages/viewer"
+import Terms from "./pages/terms-and-conditions"
 
 
 
@@ -41,6 +42,7 @@ function App() {
 					<Route path='/calendar' element={<Calendar />}/>
 					<Route path='/viewer' element={<Viewer />}/>
 					<Route path="/" element={<Navigate replace to="/login" />}/>
+					<Route path="/terms" element={<Terms />}/>
 
 				</Routes>
 			</Router>

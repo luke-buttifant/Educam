@@ -14,7 +14,7 @@ import axios from 'axios'
 
 
 function NavBar(){
-  const withouSidebarRoutes = ["/login", "/register"];
+  const withouSidebarRoutes = ["/login", "/register", "/terms"];
 
   let navigate = useNavigate()
   
