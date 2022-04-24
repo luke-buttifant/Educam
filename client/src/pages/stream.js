@@ -1,8 +1,8 @@
-import {React, useState, useEffect, useRef} from "react"
+import {React, useState, useEffect, useRef, useReducer} from "react"
 import * as ReactDOM from 'react-dom';
 import "../App.css"
 import VideoFeed from "../components/getVideoFeed";
-import {BsFillPlusCircleFill, BsThreeDots} from 'react-icons/bs'
+import {BsFillPlusCircleFill, BsPersonDashFill, BsThreeDots} from 'react-icons/bs'
 import {BiSend} from 'react-icons/bi'
 import {FiPhone} from 'react-icons/fi'
 import {AiOutlineAudioMuted, AiOutlineUserAdd} from 'react-icons/ai'
@@ -17,12 +17,15 @@ import io from 'socket.io-client';
 import { socket } from "../components/socketConnection";
 import { DataGrid} from '@mui/x-data-grid';
 import { useStopwatch } from 'react-timer-hook';
+import draw from "../mask";
+
 
 const Stream = () =>{
   const location = useLocation();
   let navigate = useNavigate()
   const pubVideo = useRef();
   const chatRoom = useRef();
+  const canvasRef = useRef();
   const input = useRef();
   const attendanceGrid = useRef();
   const videoDiv = useRef();
@@ -34,6 +37,7 @@ const Stream = () =>{
  const [firstName, setFirstName] = useState()
  const [messageList, setMessageList] = useState([]);
  const [userStats, setUserStats] = useState([])
+ const blazeface = require('@tensorflow-models/blazeface');
 
  var {
   seconds,
@@ -225,9 +229,53 @@ const [data, setData] = useState({})
       editable: true,
     },
   ];
+
+  const runFaceDetection = async () =>{
+    const model = await blazeface.load()
+    console.log("Blazeface loaded...")
+    setInterval(() => {
+      detect(model)
+    }, 1000);
+  }
+
+  useEffect(() => {
+    runFaceDetection();
+  }, [])
+  var running = true;
+
+  const returnTensors = false;
   
 
+  const detect = async (model) => {
+    if(
+      typeof pubVideo.current !== "undefined" &&
+      pubVideo.current !== null
+    ){
+      //Get video properties
+      const videoWidth = pubVideo.current.videoWidth;
+      const videoHeight = pubVideo.current.videoHeight;
+
+      //Set video height and width
+      pubVideo.current.width = videoWidth;
+      pubVideo.current.height = videoHeight;
+
+      canvasRef.current.width = videoWidth;
+      canvasRef.current.height = videoHeight;
+
+      const prediction = await model.estimateFaces(pubVideo.current, returnTensors)
+      if(prediction.length > 0){
+        console.log(prediction)
+      }
+      else{
+          
+      }
+      
+      const ctx = canvasRef.current.getContext("2d");
+      draw(prediction, ctx)
+    }
+  }
   
+ 
   return (
       <>
       {/* <h1>Meeting time: {hours},{minutes}, {seconds}</h1> */}
@@ -249,7 +297,13 @@ const [data, setData] = useState({})
           
         </div>
       <div id="videoDiv" className="col-span-2 mt-32 mx-5">
-        <div><video autoPlay={true} id="videoElement" ref={pubVideo} className='rounded-lg shadow-lg min-w-[100%]'></video>
+        <div>
+
+        <div className="videoParent">
+            <div><video autoPlay={true} id="videoElement" ref={pubVideo} className='rounded-lg shadow-lg min-w-[100%] '></video></div>
+            <div><canvas className=" min-h-[100%] max-w-[100%]" ref={canvasRef}></canvas></div>
+        </div>
+
         <div className="max-w-[80%] mx-auto">
         <div className="container mt-5 flex flex-row mx-auto">
           <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto" ><AiOutlineAudioMuted size={40} className="mx-auto text-center mt-5 p-2"/></div>

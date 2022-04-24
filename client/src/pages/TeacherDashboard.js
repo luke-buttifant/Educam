@@ -53,8 +53,6 @@ const [data, setData] = useState({})
     })
   }
 
-  const { faker } = require('@faker-js/faker');
-
   const options = {
     responsive: true,
     plugins: {
