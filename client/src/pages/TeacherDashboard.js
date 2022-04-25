@@ -169,7 +169,7 @@ const [data, setData] = useState({})
             <div className='text-xl font-bold dark:text-white'>New Classroom</div></div>
             <div className='flex flex-col'>
           <div className='bg-dark-mode rounded-lg shadow-lg'><button className='p-5 mx-auto text-center text-white' type='button'><AiOutlineSchedule size={100} /></button></div>
-          <div className='text-xl font-bold dark:text-white'>Schedule</div></div>
+          <div className='text-xl font-bold dark:text-white'>Students</div></div>
         </div>
 
         </div>

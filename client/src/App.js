@@ -12,6 +12,7 @@ import StudentDashboard from "./pages/StudentDashboard"
 import TeacherDashboard from "./pages/TeacherDashboard"
 import Viewer from "./pages/viewer"
 import Terms from "./pages/terms-and-conditions"
+import Students from "./pages/students"
 
 
 
@@ -43,6 +44,7 @@ function App() {
 					<Route path='/viewer' element={<Viewer />}/>
 					<Route path="/" element={<Navigate replace to="/login" />}/>
 					<Route path="/terms" element={<Terms />}/>
+					<Route path="/students" element={<Students />}/>
 
 				</Routes>
 			</Router>

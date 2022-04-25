@@ -3,9 +3,10 @@ import * as ReactDOM from 'react-dom';
 import "../App.css"
 import VideoFeed from "../components/getVideoFeed";
 import {BsFillPlusCircleFill, BsPersonDashFill, BsThreeDots} from 'react-icons/bs'
-import {BiSend} from 'react-icons/bi'
+import {BiSend, BiGlasses} from 'react-icons/bi'
 import {FiPhone} from 'react-icons/fi'
 import {AiOutlineAudioMuted, AiOutlineUserAdd} from 'react-icons/ai'
+import {MdScreenShare} from "react-icons/md"
 import dp from '../images/dp.png'
 import ChatMessage from "../components/chat.js";
 import { useNavigate } from "react-router-dom";
@@ -31,6 +32,9 @@ const Stream = () =>{
   const videoDiv = useRef();
   const [clientState, setClientState] = useState()
   const [connections, setConnections] = useState(0)
+  const [isLoading, setIsloading] = useState(false);
+  const [AR, setAR] = useState(false);
+  const [sharingScreen, setSharingScreen] = useState(false);
    // Messages States
  const [message, setMessage] = useState("");
  const [picture, setPicture] = useState()
@@ -128,6 +132,10 @@ const [data, setData] = useState({})
     })
   }
 
+  function stopAR(){
+    clearInterval();
+  }
+
   // WEBRTC 
   let client, signal;
 
@@ -145,8 +153,11 @@ const [data, setData] = useState({})
     setClientState(client);
 
     signal.onopen = () => client.join(location.state.room);
-    
-   LocalStream.getUserMedia({
+    streamWebcam(client);
+  }
+
+  function streamWebcam(client){
+    LocalStream.getUserMedia({
       resolution: 'vga',
       audio: true,
       codec: "vp8"
@@ -159,6 +170,22 @@ const [data, setData] = useState({})
     })
   }
 
+
+  function shareScreen(client){
+    LocalStream.getDisplayMedia({
+      resolution: 'vga',
+      audio: true,
+      video: true,
+      codec: "vp8"
+    }).then((media) => {
+    pubVideo.current.srcObject = media;
+    pubVideo.current.autoplay = true;
+    pubVideo.current.controls = true;
+    pubVideo.current.muted = true;
+    client.publish(media);
+    })
+    setSharingScreen(true)
+  }
 
   function endCall(){
     clientState.close();
@@ -230,17 +257,27 @@ const [data, setData] = useState({})
     },
   ];
 
-  const runFaceDetection = async () =>{
-    const model = await blazeface.load()
-    console.log("Blazeface loaded...")
-    setInterval(() => {
-      detect(model)
-    }, 1000);
+  function changeState(conditon){
+    setIsloading(conditon)
   }
 
-  useEffect(() => {
-    runFaceDetection();
-  }, [])
+  const runFaceDetection = async () =>{
+    setAR(!AR)
+    changeState(true);
+    const model = await blazeface.load()
+    console.log("Blazeface loaded...")
+    var faceDetectInterval = setInterval(() => {
+      detect(model)
+      changeState(false);
+    }, 1000);
+    if(AR){
+      console.log(AR)
+      console.log(faceDetectInterval)
+      clearInterval(faceDetectInterval);
+      setAR(!AR)
+      return
+    }
+  }
   var running = true;
 
   const returnTensors = false;
@@ -264,7 +301,7 @@ const [data, setData] = useState({})
 
       const prediction = await model.estimateFaces(pubVideo.current, returnTensors)
       if(prediction.length > 0){
-        console.log(prediction)
+        
       }
       else{
           
@@ -303,13 +340,14 @@ const [data, setData] = useState({})
             <div><video autoPlay={true} id="videoElement" ref={pubVideo} className='rounded-lg shadow-lg min-w-[100%] '></video></div>
             <div><canvas className=" min-h-[100%] max-w-[100%]" ref={canvasRef}></canvas></div>
         </div>
-
         <div className="max-w-[80%] mx-auto">
         <div className="container mt-5 flex flex-row mx-auto">
           <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto" ><AiOutlineAudioMuted size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-red-400 rounded-full mx-auto cursor-pointer hover:opacity-50" onClick={endCall}><FiPhone size={40} className="mx-auto text-center mt-5 p-2"/></div>
-            <div className="w-20 h-20 bg-gray-300 rounded-full text-green-400 mx-auto"><AiOutlineUserAdd size={40} className="mx-auto text-center mt-5 p-2"/></div>
+            {shareScreen ? <div className="w-20 h-20 bg-gray-300 rounded-full  mx-auto cursor-pointer" onClick={() => shareScreen(clientState)}><MdScreenShare size={40} className="mx-auto text-center mt-5 p-2"/></div> :
+             <div className="w-20 h-20 bg-gray-300 rounded-full  mx-auto cursor-pointer" onClick={() => clientState.close() && streamWebcam(clientState)}><MdScreenShare size={40} className="mx-auto text-center mt-5 p-2"/></div>}
             <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto"><BsThreeDots size={40} className="mx-auto text-center mt-5 p-2"/></div>
+            <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto text-purple-400 cursor-pointer" onClick={runFaceDetection}>{isLoading ? <BiGlasses size={40} className="mx-auto text-center mt-5 p-2 animate-spin"/> : <BiGlasses size={40} className="mx-auto text-center mt-5 p-2"/> }</div>
 
         </div>
         </div>
