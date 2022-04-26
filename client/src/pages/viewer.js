@@ -151,10 +151,9 @@ const Viewer = () =>{
         var stats = {email: user.data.email, hours: hours, minutes: minutes, seconds: seconds, room: location.state.room, event_id: location.state.event_id}
         console.log(stats)
         socket.emit("send_meeting_stats", stats)
-        alert("Meeting Over!")
-        // navigate('/permissions')
+        navigate('/permissions')
       });
-    }, [navigate, socket]);
+    }, [socket]);
    
 
 const [data, setData] = useState({})

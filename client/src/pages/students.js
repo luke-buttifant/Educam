@@ -32,21 +32,23 @@ const [classrooms, setClassrooms] = useState([])
   const columns = [
     {
       field: 'name',
-      headerName: 'First name',
-      width: 150,
-      editable: true,
+      headerName: 'email',
+      width: 250,
+      type: 'text',
+      editable: false
     },
     {
       field: 'lastClassAttendanceTime',
       headerName: 'Last Class Attendance Time',
-      width: 150,
+      type: 'number',
+      width: 250,
       editable: true,
     },
     {
       field: 'totalAttendanceTime',
       headerName: 'Total Attendance Time',
       type: 'number',
-      width: 110,
+      width: 250,
       editable: true,
     },
   ];

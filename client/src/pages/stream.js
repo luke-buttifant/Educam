@@ -102,9 +102,31 @@ const Stream = () =>{
 
       
       socket.on("user_sent_stats", (data) => {
-        var seconds = data.seconds + (data.minutes * 60) + (data.hours * 3600)
+        var meetingTime = localStorage.getItem("meetingTime");
+        meetingTime = JSON.parse(meetingTime);
+        var meetingHours = meetingTime.hours;
+        var meetingMinutes = meetingTime.minutes;
+        var meetingSeconds = meetingTime.seconds;
 
-        setUserStats((stats) => [...stats, {id: data.email, hours: data.hours, minutes: data.minutes, seconds: data.seconds}])
+        var overalMeetingTime = meetingSeconds + (meetingMinutes * 60) + (meetingHours * 3600);
+        var seconds = parseInt(data.seconds) + (parseInt(data.minutes * 60)) + (parseInt(data.hours * 3600))
+        console.log(`overal: ${overalMeetingTime} students: ${seconds}`)
+        var percDiff = Math.round((seconds / overalMeetingTime) * 100) 
+        var status;
+        console.log(percDiff)
+
+        if(percDiff > 60){
+          status = "Actively Attended"
+        }
+        else if(percDiff > 0){
+          status = "Attended"
+        }
+        else{
+          status = "Not attended"
+        }
+
+
+        setUserStats((stats) => [...stats, {id: data.email, hours: data.hours, minutes: data.minutes, seconds: data.seconds, status: status}])
       })
 
 
@@ -132,9 +154,7 @@ const [data, setData] = useState({})
     })
   }
 
-  function stopAR(){
-    clearInterval();
-  }
+
 
   // WEBRTC 
   let client, signal;
@@ -194,7 +214,6 @@ const [data, setData] = useState({})
     document.getElementById("attendanceGrid").classList.remove("hidden") 
     document.getElementById("chat").classList.add("hidden")
     pause();
-    console.log(seconds,minutes,hours)
   }
 
   async function updateAttendance(stats){
@@ -204,13 +223,15 @@ const [data, setData] = useState({})
     var hours = []
     var minutes = []
     var seconds = []
+    var status = []
     for(let i = 0; i < stats.length; i++){
       emails.push(stats[i].id)
       hours.push(stats[i].hours)
       minutes.push(stats[i].minutes)
       seconds.push(stats[i].seconds)
+      status.push(stats[i].status)
     }
-    await axios.post("/api/classroom/updateAttendance", {_id: data._id,userEmails: emails, hours: hours, minutes: minutes, seconds: seconds, event_id: location.state.event_id}).then((res) => {
+    await axios.post("/api/classroom/updateAttendance", {_id: data._id,userEmails: emails, hours: hours, minutes: minutes, seconds: seconds, event_id: location.state.event_id, status: status}).then((res) => {
       console.log(res)
       if(res.data === "success"){
         alert("succesfully updated attendance!")
@@ -315,7 +336,7 @@ const [data, setData] = useState({})
  
   return (
       <>
-      {/* <h1>Meeting time: {hours},{minutes}, {seconds}</h1> */}
+      <h1>Meeting time: {hours},{minutes}, {seconds}</h1>
       <div className="grid grid-cols-3">
         <div id="attendanceGrid" className="col-span-3 hidden">
           <div  className="grid bg-white mt-10 rounded-lg p-10 mx-10">
