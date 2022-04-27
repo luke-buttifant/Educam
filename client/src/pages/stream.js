@@ -2,12 +2,11 @@ import {React, useState, useEffect, useRef, useReducer} from "react"
 import * as ReactDOM from 'react-dom';
 import "../App.css"
 import VideoFeed from "../components/getVideoFeed";
-import {BsFillPlusCircleFill, BsPersonDashFill, BsThreeDots} from 'react-icons/bs'
+import {BsFillPlusCircleFill, BsPersonDashFill, BsPeopleFill} from 'react-icons/bs'
 import {BiSend, BiGlasses} from 'react-icons/bi'
 import {FiPhone} from 'react-icons/fi'
 import {AiOutlineAudioMuted, AiOutlineUserAdd} from 'react-icons/ai'
-import {MdScreenShare} from "react-icons/md"
-import dp from '../images/dp.png'
+import {MdScreenShare, MdSettingsSystemDaydream} from "react-icons/md"
 import ChatMessage from "../components/chat.js";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -42,6 +41,9 @@ const Stream = () =>{
  const [messageList, setMessageList] = useState([]);
  const [userStats, setUserStats] = useState([])
  const blazeface = require('@tensorflow-models/blazeface');
+ const [streamObject, setStream] = useState();
+ const [muted, setMuted] = useState(false)
+ const [intervalState, setIntervalState] = useState()
 
  var {
   seconds,
@@ -54,6 +56,19 @@ const Stream = () =>{
   reset,
 } = useStopwatch({autoStart: true});
 
+
+const controlLocalVideo = (radio) => {
+  if (radio.value === "false") {
+    clientState.mute("video");
+  } else {
+    clientState.unmute("video");
+  }
+};
+
+const controlLocalAudio = (radio) => {
+  muted ? localStream.unmute("audio") : localStream.mute("audio")
+  setMuted(!muted)
+};
 
   const sendMessage = async () => {
     const messageData = { message: message, picture: picture, firstName: firstName, time: new Date(Date.now()).getHours() + ":" + new Date(Date.now()).getMinutes(), room: location.state.room}
@@ -200,12 +215,15 @@ const [data, setData] = useState({})
     streamWebcam(client);
   }
 
+  const [localStream, setLocalStream] = useState()
+
   function streamWebcam(client){
     LocalStream.getUserMedia({
       resolution: 'vga',
       audio: true,
       codec: "vp8"
     }).then((media) => {
+    setLocalStream(media)
     pubVideo.current.srcObject = media;
     pubVideo.current.autoplay = true;
     pubVideo.current.controls = true;
@@ -297,54 +315,63 @@ const [data, setData] = useState({})
   }
 
   const runFaceDetection = async () =>{
-    setAR(!AR)
+    if(AR){
+      clearInterval(intervalState)
+      console.log(AR)
+    }
+
     changeState(true);
     const model = await blazeface.load()
     console.log("Blazeface loaded...")
     var faceDetectInterval = setInterval(() => {
-      detect(model)
+      detect(model, AR)
       changeState(false);
     }, 1000);
-    if(AR){
-      console.log(AR)
-      console.log(faceDetectInterval)
-      clearInterval(faceDetectInterval);
-      setAR(!AR)
-      return
-    }
+    setIntervalState(faceDetectInterval)
+    console.log(AR)
+    setAR(!AR)
+    
   }
   var running = true;
 
   const returnTensors = false;
   
 
-  const detect = async (model) => {
-    if(
-      typeof pubVideo.current !== "undefined" &&
-      pubVideo.current !== null
-    ){
-      //Get video properties
-      const videoWidth = pubVideo.current.videoWidth;
-      const videoHeight = pubVideo.current.videoHeight;
-
-      //Set video height and width
-      pubVideo.current.width = videoWidth;
-      pubVideo.current.height = videoHeight;
-
-      canvasRef.current.width = videoWidth;
-      canvasRef.current.height = videoHeight;
-
-      const prediction = await model.estimateFaces(pubVideo.current, returnTensors)
-      if(prediction.length > 0){
-        
-      }
-      else{
-          
-      }
-      
+  const detect = async (model, AR) => {
+    if(AR){
       const ctx = canvasRef.current.getContext("2d");
-      draw(prediction, ctx)
+      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
+      return
     }
+    else{
+      if(
+        typeof pubVideo.current !== "undefined" &&
+        pubVideo.current !== null
+      ){
+        //Get video properties
+        const videoWidth = pubVideo.current.videoWidth;
+        const videoHeight = pubVideo.current.videoHeight;
+  
+        //Set video height and width
+        pubVideo.current.width = videoWidth;
+        pubVideo.current.height = videoHeight;
+  
+        canvasRef.current.width = videoWidth;
+        canvasRef.current.height = videoHeight;
+  
+        const prediction = await model.estimateFaces(pubVideo.current, returnTensors)
+        if(prediction.length > 0){
+          
+        }
+        else{
+            
+        }
+        
+        const ctx = canvasRef.current.getContext("2d");
+        draw(prediction, ctx)
+      }
+    }
+
   }
   
  
@@ -377,10 +404,10 @@ const [data, setData] = useState({})
         </div>
         <div className="max-w-[80%] mx-auto">
         <div className="container mt-5 flex flex-row mx-auto">
-          <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto" ><AiOutlineAudioMuted size={40} className="mx-auto text-center mt-5 p-2"/></div>
-            <div className="w-20 h-20 bg-red-400 rounded-full mx-auto cursor-pointer hover:opacity-50" onClick={endCall}><FiPhone size={40} className="mx-auto text-center mt-5 p-2"/></div>
+          <div className={muted ? "w-20 h-20 rounded-full mx-auto bg-red-500 hover:opacity-75 cursor-pointer" : "w-20 h-20 bg-gray-300 rounded-full mx-auto hover:opacity-75 cursor-pointer"} onClick={controlLocalAudio}><AiOutlineAudioMuted size={40} className="mx-auto text-center mt-5 p-2"/></div>
+            <div className="w-20 h-20 bg-red-400 rounded-full mx-auto cursor-pointer hover:opacity-50" onClick={endCall}><FiPhone size={40} className="mx-auto text-center mt-5 p-2 "/></div>
              <div className="w-20 h-20 bg-gray-300 rounded-full  mx-auto cursor-pointer"><MdScreenShare size={40} className="mx-auto text-center mt-5 p-2"/></div>
-            <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto"><BsThreeDots size={40} className="mx-auto text-center mt-5 p-2"/></div>
+            <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto"><BsPeopleFill size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto text-purple-400 cursor-pointer" onClick={runFaceDetection}>{isLoading ? <BiGlasses size={40} className="mx-auto text-center mt-5 p-2 animate-spin"/> : <BiGlasses size={40} className="mx-auto text-center mt-5 p-2"/> }</div>
 
         </div>
