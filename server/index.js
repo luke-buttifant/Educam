@@ -54,6 +54,13 @@ app.get("/api", (req, res) => {
     })
 
 
+
+
+
+    socket.on("teacher_joined", (data) => {
+      socket.to(data).emit("teacher_joined_room", data)
+    })
+
     socket.on("join_room", (data) => {
       socket.join(data);
       console.log(`joined room: ${data}`)
@@ -74,6 +81,11 @@ app.get("/api", (req, res) => {
       socket.to(data.room).emit("user_sent_stats", {email: data.email, hours: data.hours, minutes: data.minutes, seconds: data.seconds, event_id: data.event_id});
     })
 
+    socket.on("teacher_check_approved", (data) => {
+      socket.to(data).emit("teacher_is_in_room")
+    })
+
+    
     socket.on("send_message", (data) => {
       socket.to(data.room).emit("receive_message", data);
       console.log(data.room)

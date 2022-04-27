@@ -125,7 +125,7 @@ const [data, setData] = useState({})
       </div>
       <hr className="dark:opacity-25"></hr>
       <div><label className="text-gray-500 dark:text-white" htmlFor="email">Email Address</label></div>
-      <div><input className="min-w-full dark:bg-dark-mode-secondary p-2" name="email" type="text" defaultValue={data.email} onChange={(e) => setEmail(e.target.value)}/></div>
+      <div><input disabled className="min-w-full dark:bg-dark-mode-secondary p-2" name="email" type="text" defaultValue={data.email} onChange={(e) => setEmail(e.target.value)}/></div>
       <hr className="dark:opacity-25"></hr>
       <div><label className="text-gray-500 dark:text-white" htmlFor="gender">Gender</label></div>
       <div><input className="min-w-full dark:bg-dark-mode-secondary p-2" name="gender" type="text" defaultValue={data.gender} onChange={(e) => setGender(e.target.value)}/></div>

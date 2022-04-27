@@ -69,19 +69,22 @@ const editClassroom = asyncHandler(async (req, res) => {
 
 const updateAttendance = asyncHandler(async (req, res) => {
     console.log("attemping...")
-    var {_id, userEmails, hours, minutes, seconds, event_id} = req.body;
+    var {_id, userEmails, hours, minutes, seconds, event_id, status, activelyAttendedCount, mostlyAttendedCount, failedAttendanceCount} = req.body;
     try{
         for (let i = 0; i < userEmails.length; i++){
             
-            var newHours = hours[i] * 3600
-            var newMinutes = minutes[i] * 60
-            var newSeconds = seconds[i]
+            var newHours = parseInt(hours[i] * 3600) 
+            var newMinutes = parseInt(minutes[i] * 60) 
+            var newSeconds = parseInt(seconds[i]) 
             var time = newHours + newMinutes + newSeconds
 
             var user = await User.findOne({email: userEmails[i], "classrooms.event_id": event_id})
             for(let i = 0; i < user.classrooms.length; i++){
                 if(user.classrooms[i].event_id == event_id){
                     var totalAttendance = user.classrooms[i].totalAttendanceTime
+                    var activeCount = parseInt(user.classrooms[i].activelyAttendedCount)
+                    var mostlyCount = parseInt(user.classrooms[i].mostlyAttendedCount)
+                    var failedCount = parseInt(user.classrooms[i].failedToAttendCount)
                 }
             }
             totalAttendance = totalAttendance + time
@@ -89,11 +92,15 @@ const updateAttendance = asyncHandler(async (req, res) => {
             await User.findOneAndUpdate({email: userEmails[i], "classrooms.event_id": event_id}, {
                 "$set":{
                     "classrooms.$.lastClassAttendanceTime": time,
-                    "classrooms.$.totalAttendanceTime": totalAttendance
+                    "classrooms.$.totalAttendanceTime": totalAttendance,
+                    "classrooms.$.status": status[i],
+                    "classrooms.$.activelyAttendedCount": (activeCount + parseInt(activelyAttendedCount)),
+                    "classrooms.$.mostlyAttendedCount": (mostlyCount + parseInt(mostlyAttendedCount)),
+                    "classrooms.$.failedToAttendCount": (failedCount + parseInt(failedAttendanceCount))
                 }
             })
 
-            await User.findOneAndUpdate({_id: _id},{"$set":{ "classrooms.$[e].students.$[n].lastClassAttendanceTime": time, "classrooms.$[e].students.$[n].totalAttendanceTime": totalAttendance}},{
+            await User.findOneAndUpdate({_id: _id},{"$set":{ "classrooms.$[e].students.$[n].lastClassAttendanceTime": time, "classrooms.$[e].students.$[n].totalAttendanceTime": totalAttendance, "classrooms.$[e].students.$[n].status": status[i]}},{
                 arrayFilters: [
                     { "e.event_id": event_id},
                     {"n.name": userEmails[i]}

@@ -97,6 +97,7 @@ const Viewer = () =>{
  const [messageList, setMessageList] = useState([]);
  const [gotTrack, SetGotTrack] = useState([]);
  const [clientState, setClientState] = useState()
+ const [allowStart, setAllowStart] = useState(false)
 
   var time = useRef()
 
@@ -119,22 +120,33 @@ const Viewer = () =>{
   if(isRunning && !faceDetected){
     pause();
   }
-  if(!isRunning && faceDetected){
+
+  if(!isRunning && faceDetected && allowStart){
     start();
   }
+
 
   useEffect(() => {
     userAuthenticated();
     connectToSFU();
     runFaceDetection();
 
+    socket.on("teacher_is_in_room", (data) => {
+      setAllowStart(true)
+    })
 
+    socket.on("teacher_joined_room", (data) => {
+      if(data == location.state.room){
+        setAllowStart(true)
+      }
+    })
 
     socket.on("user_joined_room", (room) => {
       if(room == location.state.room){
         connectToSFU()
       }
     })
+
 
     socket.emit("join_room", location.state.room)
     

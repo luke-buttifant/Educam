@@ -4,7 +4,8 @@ const bcrypt = require('bcrypt');
 const student = mongoose.Schema([{
   name: String, 
   lastClassAttendanceTime: {type: Number, default: 0},
-  totalAttendanceTime: {type: Number, default: 0}
+  totalAttendanceTime: {type: Number, default: 0},
+  status: {type: String, default: "Not attended"}
 }])
 
 const classroom = mongoose.Schema([
@@ -17,6 +18,10 @@ const classroom = mongoose.Schema([
   room: String,
   lastClassAttendanceTime: {type: Number, default: 0},
   totalAttendanceTime: {type: Number, default: 0},
+  activelyAttendedCount: {type: Number, default: 0},
+  mostlyAttendedCount: {type: Number, default: 0},
+  failedToAttendCount: {type: Number, default: 0},
+  status: String,
   students: [student]
 }])
 

@@ -129,7 +129,7 @@ const [data, setData] = useState({first_name: "Loading..."})
               className="relative w-14 h-14 rounded-full"
             >
               <img
-                className="rounded-full w-max"
+                className="rounded-full w-14 h-14"
                 src={data.pic}
                 alt=""
               />

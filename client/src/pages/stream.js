@@ -68,6 +68,8 @@ const Stream = () =>{
   }
 
   useEffect(() => {
+    socket.emit("teacher_joined", location.state.room)
+
     var time = window.localStorage.getItem("meetingTime")
     console.log(JSON.parse(time))
   }, [])
@@ -85,9 +87,24 @@ const Stream = () =>{
         setMessageList((list) => [...list, data])
       });
 
+      socket.on("is_teacher_in_room", (data) => {
+        console.log("recieved is teacher in room")
+        socket.to(data).emit("teacher_check_passed")})
+
       socket.on("user_joined_room", (room) => {
         if(room == location.state.room){
           connectToSFU()
+          setConnections(connections + 1)
+          socket.emit("teacher_check_approved", location.state.room)
+        }
+      })
+
+      socket.on("user_is_in_room", () => {
+        setConnections(connections + 1)
+      })
+      
+      socket.on("student_is_in_room", (data) => {
+        if(data == location.state.room){
           setConnections(connections + 1)
         }
       })
@@ -115,18 +132,25 @@ const Stream = () =>{
         var status;
         console.log(percDiff)
 
+        var activelyAttendedCount = 0
+        var mostlyAttendedCount = 0
+        var failedAttendanceCount = 0
+
         if(percDiff > 60){
           status = "Actively Attended"
+          activelyAttendedCount = 1
         }
         else if(percDiff > 0){
           status = "Attended"
+          mostlyAttendedCount = 1
         }
         else{
           status = "Not attended"
+          failedAttendanceCount = 1
         }
 
 
-        setUserStats((stats) => [...stats, {id: data.email, hours: data.hours, minutes: data.minutes, seconds: data.seconds, status: status}])
+        setUserStats((stats) => [...stats, {id: data.email, hours: data.hours, minutes: data.minutes, seconds: data.seconds, status: status, activelyAttendedCount, mostlyAttendedCount, failedAttendanceCount}])
       })
 
 
@@ -190,25 +214,8 @@ const [data, setData] = useState({})
     })
   }
 
-
-  function shareScreen(client){
-    LocalStream.getDisplayMedia({
-      resolution: 'vga',
-      audio: true,
-      video: true,
-      codec: "vp8"
-    }).then((media) => {
-    pubVideo.current.srcObject = media;
-    pubVideo.current.autoplay = true;
-    pubVideo.current.controls = true;
-    pubVideo.current.muted = true;
-    client.publish(media);
-    })
-    setSharingScreen(true)
-  }
-
   function endCall(){
-    clientState.close();
+    
     socket.emit("end_call", {room: location.state.room});
     document.getElementById("videoDiv").classList.add("hidden")
     document.getElementById("attendanceGrid").classList.remove("hidden") 
@@ -224,14 +231,21 @@ const [data, setData] = useState({})
     var minutes = []
     var seconds = []
     var status = []
+    var activeCount = []
+    var mostlyCount = []
+    var failedCount = []
     for(let i = 0; i < stats.length; i++){
       emails.push(stats[i].id)
       hours.push(stats[i].hours)
       minutes.push(stats[i].minutes)
       seconds.push(stats[i].seconds)
       status.push(stats[i].status)
+      activeCount.push(stats[i].activelyAttendedCount)
+      mostlyCount.push(stats[i].mostlyAttendedCount)
+      failedCount.push(stats[i].failedAttendanceCount)
+      
     }
-    await axios.post("/api/classroom/updateAttendance", {_id: data._id,userEmails: emails, hours: hours, minutes: minutes, seconds: seconds, event_id: location.state.event_id, status: status}).then((res) => {
+    await axios.post("/api/classroom/updateAttendance", {_id: data._id,userEmails: emails, hours: hours, minutes: minutes, seconds: seconds, event_id: location.state.event_id, status: status, activelyAttendedCount: activeCount, mostlyAttendedCount: mostlyCount, failedAttendanceCount: failedCount }).then((res) => {
       console.log(res)
       if(res.data === "success"){
         alert("succesfully updated attendance!")
@@ -365,8 +379,7 @@ const [data, setData] = useState({})
         <div className="container mt-5 flex flex-row mx-auto">
           <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto" ><AiOutlineAudioMuted size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-red-400 rounded-full mx-auto cursor-pointer hover:opacity-50" onClick={endCall}><FiPhone size={40} className="mx-auto text-center mt-5 p-2"/></div>
-            {shareScreen ? <div className="w-20 h-20 bg-gray-300 rounded-full  mx-auto cursor-pointer" onClick={() => shareScreen(clientState)}><MdScreenShare size={40} className="mx-auto text-center mt-5 p-2"/></div> :
-             <div className="w-20 h-20 bg-gray-300 rounded-full  mx-auto cursor-pointer" onClick={() => clientState.close() && streamWebcam(clientState)}><MdScreenShare size={40} className="mx-auto text-center mt-5 p-2"/></div>}
+             <div className="w-20 h-20 bg-gray-300 rounded-full  mx-auto cursor-pointer"><MdScreenShare size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto"><BsThreeDots size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto text-purple-400 cursor-pointer" onClick={runFaceDetection}>{isLoading ? <BiGlasses size={40} className="mx-auto text-center mt-5 p-2 animate-spin"/> : <BiGlasses size={40} className="mx-auto text-center mt-5 p-2"/> }</div>
 
