@@ -63,9 +63,12 @@ app.get("/api", (req, res) => {
       socket.to(data).emit("teacher_joined_room", data)
     })
 
+    socket.on("ignore_request", (data) => {
+      socket.to(data).emit("teacher_ignored_request", data)
+    })
+
     socket.on("join_room", (data) => {
       socket.join(data);
-      console.log(`joined room: ${data}`)
       socket.to(data).emit("user_joined_room", data);
     });
 

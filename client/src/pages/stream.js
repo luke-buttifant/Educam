@@ -87,10 +87,20 @@ const handleClose = (event, reason) => {
   setOpen(false);
 };
 
+const handleIgnore = (event, reason) => {
+  console.log(reason)
+  if (reason === 'clickaway'){
+    return;
+  }
+
+  socket.emit("ignore_request", location.state.room)
+  setOpen(false)
+}
+
 const action = (
   <react.Fragment>
-    <Button color="secondary" size="small" onClick={handleClose}>
-      UNDO
+    <Button color="secondary" size="small" onClick={handleIgnore}>
+      Ignore
     </Button>
     <IconButton
       size="small"
@@ -151,6 +161,7 @@ const action = (
         setStudentName(data.name)
         setOpen(true)
       })
+
 
       socket.on("update_user_connections", () => {
         console.log("user is already in room")
@@ -416,10 +427,14 @@ const [data, setData] = useState({})
 
   }
   
+  async function getStats(client){
+    var response = await client.getSubStats()
+    console.log(response)
+  }
  
   return (
       <>
-      <h1>Meeting time: {hours},{minutes}, {seconds}</h1>
+      <button onClick={() => {getStats(clientState)}}>GET STATS</button>
       <div>
       <Snackbar
         open={open}
@@ -489,6 +504,7 @@ const [data, setData] = useState({})
         <div className="flex flex-col bg-gray-100 px-10">
         <div className="font-bold text-secondary">Attendance Statistics</div>
         <div className="font-light">Users connected:  {connections}</div>
+        <div className="font-light">Meeting Time: {hours}:{minutes}:{seconds}</div>
         <div className="flex flex-row">
         </div>
 

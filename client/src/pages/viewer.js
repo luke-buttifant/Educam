@@ -4,6 +4,7 @@ import VideoFeed from "../components/getVideoFeed";
 import {BsFillPlusCircleFill, BsThreeDots} from 'react-icons/bs'
 import {BiSend} from 'react-icons/bi'
 import {FiPhone} from 'react-icons/fi'
+import {HiOutlineHand} from 'react-icons/hi'
 import {AiOutlineAudioMuted, AiOutlineUserAdd} from 'react-icons/ai'
 import dp from '../images/dp.png'
 import ChatMessage from "../components/chat.js";
@@ -18,6 +19,12 @@ import io from 'socket.io-client';
 import ScrollToBottom from 'react-scroll-to-bottom'
 import { useStopwatch } from 'react-timer-hook';
 import { socket } from "../components/socketConnection";
+import Snackbar from '@mui/material/Snackbar';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+import Button from '@mui/material/Button';
+import * as react from "react"
+
 
 const Viewer = () =>{
   
@@ -28,6 +35,8 @@ const Viewer = () =>{
   const attendanceTime = useRef(null)
   const attendanceTxt = useRef(null)
   const [faceDetected, setFaceDetected]= useState(false)
+  const [open, setOpen] = useState(false);
+  const [muted, setMuted] = useState(false);
 
   const {
     seconds,
@@ -48,6 +57,27 @@ const Viewer = () =>{
       detect(model)
     }, 1000);
   }
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+  
+    setOpen(false);
+  };
+
+  const action = (
+    <react.Fragment>
+      <IconButton
+        size="small"
+        aria-label="close"
+        color="inherit"
+        onClick={handleClose}
+      >
+        <CloseIcon fontSize="small" />
+      </IconButton>
+    </react.Fragment>
+  );
 
   var running = true;
 
@@ -153,6 +183,11 @@ const Viewer = () =>{
     })
 
     
+    socket.on("teacher_ignored_request", (data) => {
+        setOpen(true)
+    }) 
+
+    
 
 
     socket.emit("join_room", location.state.room)
@@ -221,7 +256,10 @@ const [data, setData] = useState({})
 }}}
 
 
-
+function muteCall(){
+  subVideo.current.muted = true;
+  setMuted(!muted)
+}
 
 function end_call(){
   socket.emit("leave_room", location.state.room);
@@ -236,15 +274,24 @@ function end_call(){
 
   return (
       <>
+            <div>
+      <Snackbar
+        open={open}
+        autoHideDuration={6000}
+        onClose={handleClose}
+        message={`The teacher refused your request!`}
+        action={action}
+      />
+    </div>
       <div className="grid grid-cols-3">
       <div className="col-span-2 mt-32 mx-5">
         <div><video autoPlay={true} id="videoElement" controls ref={subVideo} className='rounded-lg shadow-lg min-w-[100%]'></video>
         <div className="max-w-[80%] mx-auto">
         <div className="container mt-5 flex flex-row mx-auto">
-          <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto"><AiOutlineAudioMuted size={40} className="mx-auto text-center mt-5 p-2"/></div>
+          <div className={!muted ? "w-20 h-20 bg-gray-300 rounded-full mx-auto hover:opacity-75" : "w-20 h-20 bg-red-300 rounded-full mx-auto hover:opacity-75"} onClick={muteCall}><AiOutlineAudioMuted size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-red-400 rounded-full mx-auto cursor-pointer hover:opacity-50" onClick={end_call}><FiPhone size={40} className="mx-auto text-center mt-5 p-2"/></div>
-            <div className="w-20 h-20 bg-gray-300 rounded-full text-green-400 mx-auto"><AiOutlineUserAdd size={40} className="mx-auto text-center mt-5 p-2"/></div>
-            <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto" onClick={raiseHand}><BsThreeDots size={40} className="mx-auto text-center mt-5 p-2"/></div>
+            <div className="w-20 h-20 bg-white rounded-full text-green-400 mx-auto"><AiOutlineUserAdd size={40} className="mx-auto text-center mt-5 p-2"/></div>
+            <div className="w-20 h-20 bg-secondary rounded-full mx-auto" onClick={raiseHand}><HiOutlineHand size={40} className="mx-auto text-center mt-5 p-2"/></div>
 
 
         </div>
