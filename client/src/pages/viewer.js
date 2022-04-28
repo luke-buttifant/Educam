@@ -107,6 +107,10 @@ const Viewer = () =>{
     setMessageList((list) => [...list, messageData])
   };
 
+  function raiseHand() {
+    console.log(firstName)
+    socket.emit("raise_hand", {room: location.state.room, name: firstName})
+  }
 
   let navigate = useNavigate()
   const subVideo = useRef();
@@ -138,6 +142,7 @@ const Viewer = () =>{
     socket.on("teacher_joined_room", (data) => {
       if(data == location.state.room){
         setAllowStart(true)
+        socket.emit("update_connections", location.state.room)
       }
     })
 
@@ -146,6 +151,8 @@ const Viewer = () =>{
         connectToSFU()
       }
     })
+
+    
 
 
     socket.emit("join_room", location.state.room)
@@ -237,7 +244,7 @@ function end_call(){
           <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto"><AiOutlineAudioMuted size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-red-400 rounded-full mx-auto cursor-pointer hover:opacity-50" onClick={end_call}><FiPhone size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-gray-300 rounded-full text-green-400 mx-auto"><AiOutlineUserAdd size={40} className="mx-auto text-center mt-5 p-2"/></div>
-            <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto"><BsThreeDots size={40} className="mx-auto text-center mt-5 p-2"/></div>
+            <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto" onClick={raiseHand}><BsThreeDots size={40} className="mx-auto text-center mt-5 p-2"/></div>
 
 
         </div>

@@ -8,6 +8,8 @@ import {ImBin} from 'react-icons/im'
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { LazyLoadImage } from "react-lazy-load-image-component";
+import { useFirstRender } from "@mui/x-data-grid";
 
 const Profile = () =>{
   let navigate = useNavigate()
@@ -79,8 +81,6 @@ const [data, setData] = useState({})
       }
     })
   }
-
-
 
   return (
       <>

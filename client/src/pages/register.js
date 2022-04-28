@@ -198,9 +198,10 @@ const Register = () =>{
                     {message &&<ErrorMessage>{message}</ErrorMessage>}
                     <input className="mb-2" type="checkbox" id="agree" onChange={checkboxHandler} />
                     <label htmlFor="agree"> I agree to <b><a href="/terms">terms and conditions</a></b></label>
-                    <button disabled={true}
+                    {!agree ? <button
+                                disabled
                                 type="submit"   
-                                className={!agree ? "text-center w-full py-4 bg-gray-200 opacity-75  text-white shadow-lg rounded-2xl mx-auto font-bold " : "text-center w-full py-4 bg-secondary hover:bg-dark-mode  text-white shadow-lg rounded-2xl mx-auto font-bold cursor-pointer" }>
+                                className="text-center w-full py-4 bg-gray-200 opacity-75  text-white shadow-lg rounded-2xl mx-auto font-bold ">
                                     <div className="flex flex-row items-center">
                                         <div className="mx-auto flex">
                                         <div className="text-center">Register</div>{loading && <Spinner />}
@@ -208,7 +209,19 @@ const Register = () =>{
                                     
                                     </div>
                                    
-                            </button>
+                            </button> : 
+                            <button
+                            type="submit"   
+                            className="text-center w-full py-4 bg-secondary hover:bg-dark-mode  text-white shadow-lg rounded-2xl mx-auto font-bold cursor-pointer">
+                                <div className="flex flex-row items-center">
+                                    <div className="mx-auto flex">
+                                    <div className="text-center">Register</div>{loading && <Spinner />}
+                                    </div>
+                                
+                                </div>
+                               
+                        </button>}
+                    
                         
                         <a href="/login" className="text-sm font-sans font-medium text-gray-500 underline mx-auto text-center">
                    Already have an account? Sign in

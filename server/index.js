@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const http = require('http');
-const { Server } = require('socket.io')
+const { Server, Socket } = require('socket.io')
 const cors = require("cors")
 app.use(cors())
 
@@ -54,7 +54,9 @@ app.get("/api", (req, res) => {
     })
 
 
-
+    socket.on("raise_hand", (data) => {
+      socket.to(data.room).emit("student_raised_hand", data)
+    })
 
 
     socket.on("teacher_joined", (data) => {
@@ -82,7 +84,12 @@ app.get("/api", (req, res) => {
     })
 
     socket.on("teacher_check_approved", (data) => {
-      socket.to(data).emit("teacher_is_in_room")
+      socket.to(data).emit("teacher_is_in_room", data)
+    })
+
+    socket.on("update_connections", (data) => {
+      console.log("update connections recieved room: " + data)
+      socket.to(data).emit("update_user_connections", data)
     })
 
     

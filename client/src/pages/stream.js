@@ -18,6 +18,11 @@ import { socket } from "../components/socketConnection";
 import { DataGrid} from '@mui/x-data-grid';
 import { useStopwatch } from 'react-timer-hook';
 import draw from "../mask";
+import Snackbar from '@mui/material/Snackbar';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+import Button from '@mui/material/Button';
+import * as react from "react"
 
 
 const Stream = () =>{
@@ -44,6 +49,8 @@ const Stream = () =>{
  const [streamObject, setStream] = useState();
  const [muted, setMuted] = useState(false)
  const [intervalState, setIntervalState] = useState()
+ const [open, setOpen] = useState(false);
+ const [studentName, setStudentName] = useState()
 
  var {
   seconds,
@@ -69,6 +76,32 @@ const controlLocalAudio = (radio) => {
   muted ? localStream.unmute("audio") : localStream.mute("audio")
   setMuted(!muted)
 };
+
+
+
+const handleClose = (event, reason) => {
+  if (reason === 'clickaway') {
+    return;
+  }
+
+  setOpen(false);
+};
+
+const action = (
+  <react.Fragment>
+    <Button color="secondary" size="small" onClick={handleClose}>
+      UNDO
+    </Button>
+    <IconButton
+      size="small"
+      aria-label="close"
+      color="inherit"
+      onClick={handleClose}
+    >
+      <CloseIcon fontSize="small" />
+    </IconButton>
+  </react.Fragment>
+);
 
   const sendMessage = async () => {
     const messageData = { message: message, picture: picture, firstName: firstName, time: new Date(Date.now()).getHours() + ":" + new Date(Date.now()).getMinutes(), room: location.state.room}
@@ -114,11 +147,29 @@ const controlLocalAudio = (radio) => {
         }
       })
 
+      socket.on("student_raised_hand", (data) => {
+        setStudentName(data.name)
+        setOpen(true)
+      })
+
+      socket.on("update_user_connections", () => {
+        console.log("user is already in room")
+        setConnections(connections + 1)
+      })
+
       socket.on("user_is_in_room", () => {
+        console.log("user in room")
         setConnections(connections + 1)
       })
       
       socket.on("student_is_in_room", (data) => {
+        if(data == location.state.room){
+          setConnections(connections + 1)
+        }
+      })
+
+      socket.on("update_user_connection", (data) => {
+        console.log("user is already in room")
         if(data == location.state.room){
           setConnections(connections + 1)
         }
@@ -221,7 +272,8 @@ const [data, setData] = useState({})
     LocalStream.getUserMedia({
       resolution: 'vga',
       audio: true,
-      codec: "vp8"
+      codec: "vp8",
+      simulcast: true
     }).then((media) => {
     setLocalStream(media)
     pubVideo.current.srcObject = media;
@@ -315,22 +367,19 @@ const [data, setData] = useState({})
   }
 
   const runFaceDetection = async () =>{
-    if(AR){
-      clearInterval(intervalState)
-      console.log(AR)
-    }
-
     changeState(true);
     const model = await blazeface.load()
     console.log("Blazeface loaded...")
-    var faceDetectInterval = setInterval(() => {
+    setIntervalState(setInterval(() => {
       detect(model, AR)
       changeState(false);
-    }, 1000);
-    setIntervalState(faceDetectInterval)
+    }, 1000));
     console.log(AR)
     setAR(!AR)
-    
+    console.log(AR)
+    if(AR){
+      clearInterval(intervalState)
+    }
   }
   var running = true;
 
@@ -359,14 +408,7 @@ const [data, setData] = useState({})
         canvasRef.current.width = videoWidth;
         canvasRef.current.height = videoHeight;
   
-        const prediction = await model.estimateFaces(pubVideo.current, returnTensors)
-        if(prediction.length > 0){
-          
-        }
-        else{
-            
-        }
-        
+        const prediction = await model.estimateFaces(pubVideo.current, returnTensors)        
         const ctx = canvasRef.current.getContext("2d");
         draw(prediction, ctx)
       }
@@ -378,6 +420,15 @@ const [data, setData] = useState({})
   return (
       <>
       <h1>Meeting time: {hours},{minutes}, {seconds}</h1>
+      <div>
+      <Snackbar
+        open={open}
+        autoHideDuration={6000}
+        onClose={handleClose}
+        message={`${studentName} raised their hand!`}
+        action={action}
+      />
+    </div>
       <div className="grid grid-cols-3">
         <div id="attendanceGrid" className="col-span-3 hidden">
           <div  className="grid bg-white mt-10 rounded-lg p-10 mx-10">

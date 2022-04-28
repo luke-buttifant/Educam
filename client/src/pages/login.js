@@ -1,11 +1,12 @@
 import {React, useEffect, useState} from "react"
 import "../App.css"
-import loginIllustration from "../images/loginIllustration.png"
+import loginIllustration from "../images/loginIllustration.webp"
 import Logo from '../images/Logo.png'
 import axios from "axios"
 import Spinner from "../components/spinner"
 import ErrorMessage from "../components/errorMessage"
 import { useNavigate } from "react-router-dom"
+import { LazyLoadImage } from "react-lazy-load-image-component"
 
 
 const Login = () =>{
@@ -57,12 +58,19 @@ const Login = () =>{
   return (
     <>
     <div className="grid grid-cols-2">
-      <div className="min-w-max min-h-screen"><img className="min-w-max min-h-screen flex" src={loginIllustration}></img></div>
+
+      <div className="min-w-max min-h-screen">        <LazyLoadImage
+              alt="Login Illustration"
+              height="50px"
+              width="50px"
+              className='min-w-max min-h-screen flex'
+              src={loginIllustration}
+              /></div>
       <div className="text-white font-sans font-bold container bg-white mx-auto text-center">
                 <div className="grid grid-rows-6 min-h-screen items-center mx-auto text-center">
                 
                     <div className="row-span-4 row-start-1 col-auto text-black mx-auto">
-                        <img className="w-32 mb-5 mt-10 ml-20 mx-auto" src={Logo}></img>
+                        <img className="w-32 mb-5 mt-10 ml-20 mx-auto" width={128} height={128} src={Logo}></img>
                         <div className="flex"><h1 className="text-2xl lg:text-3xl pr-2 pt-2">Welcome to</h1><h1 className="text-3xl lg:text-3xl bg-secondary p-2 rounded-lg text-white">Educam.</h1></div>
                         <h2 className="text-xl float-left text-gray-500">login to your account</h2>
 

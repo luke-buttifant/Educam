@@ -3,7 +3,7 @@ import { BsCalendarCheck, BsInfoCircle } from 'react-icons/bs'
 import { MdOutlineNavigateBefore, MdOutlineNavigateNext, MdOutlineSpaceDashboard } from 'react-icons/md'
 import { AiOutlineInfoCircle, AiOutlineSetting } from 'react-icons/ai'
 import { GoSignOut } from 'react-icons/go'
-import Logo from '../images/Logo.png'
+import Logo from '../images/Logo.webp'
 import dp from '../images/dp.png'
 import {React, useState, useEffect} from 'react'
 import {useLocation } from "react-router-dom";
@@ -11,6 +11,7 @@ import Toggle from './ThemeToggle'
 import MobileToggle from './MobileThemeToggle'
 import {useNavigate} from 'react-router-dom'
 import axios from 'axios'
+import { LazyLoadImage } from 'react-lazy-load-image-component';
 
 
 function NavBar(){
@@ -56,7 +57,7 @@ const [data, setData] = useState({first_name: "Loading..."})
             href="#"
             className="w-12 rounded flex "
           >
-            <img src={Logo}></img>
+            <img width="50px" height="50px" src={Logo}></img>
           </a>
           <button onClick={toggleNav} className="flex items-center justify-center p-0.5 bg-gray-200 rounded-md roundedfocus:outline-none focus:ring-1 focus:ring-gray-500 shadow-lg">
             <MdOutlineNavigateBefore size={30} />
@@ -128,14 +129,21 @@ const [data, setData] = useState({first_name: "Loading..."})
             <div
               className="relative w-14 h-14 rounded-full"
             >
-              <img
+              {data.pic ? <LazyLoadImage
+              alt="profile picture"
+              height="50px"
+              width="50px"
+              className='rounded-full mt-1'
+              src={data.pic}
+              /> : ""}
+              {/* <img
                 className="rounded-full w-14 h-14"
                 src={data.pic}
                 alt=""
-              />
+              /> */}
             </div>
             <div className="flex flex-col pl-3">
-              <div className="text-sm text-gray-50">{data.first_name}</div>
+              <div className="text-sm text-gray-50">{data.first_name ? data.first_name : "Loading..."}</div>
               <span className="text-sm text-gray-200 font-light tracking-tight">
                {data.school}
                </span>
@@ -184,7 +192,7 @@ const [data, setData] = useState({first_name: "Loading..."})
             href="#"
             className="flex "
           >
-            <img src={Logo} className="w-12"></img>
+            <img width={50} height={50} src={Logo} className="w-12"></img>
           </a>
         </div>
                   <button onClick={toggleNav} className="bg-white  rounded-tr-lg rounded-br-lg focus:outline-none  absolute top-16 left-24 dark:bg-dark-mode dark:text-white">
