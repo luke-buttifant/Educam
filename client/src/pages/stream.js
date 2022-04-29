@@ -23,6 +23,7 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Button from '@mui/material/Button';
 import * as react from "react"
+import Modal from '@mui/material/Modal';
 
 
 const Stream = () =>{
@@ -51,6 +52,8 @@ const Stream = () =>{
  const [intervalState, setIntervalState] = useState()
  const [open, setOpen] = useState(false);
  const [studentName, setStudentName] = useState()
+ const [studentList, setStudentList] = useState([]);
+ const [openModal, setOpenModal] = useState(false)
 
  var {
   seconds,
@@ -92,6 +95,13 @@ const handleIgnore = (event, reason) => {
   if (reason === 'clickaway'){
     return;
   }
+
+const openModal = () => {
+  setOpenModal(true)
+}
+const closeModal = () => {
+  setOpenModal(false)
+}
 
   socket.emit("ignore_request", location.state.room)
   setOpen(false)
@@ -149,10 +159,11 @@ const action = (
         console.log("recieved is teacher in room")
         socket.to(data).emit("teacher_check_passed")})
 
-      socket.on("user_joined_room", (room) => {
-        if(room == location.state.room){
+      socket.on("user_joined_room", (data) => {
+        if(data.room == location.state.room){
           connectToSFU()
           setConnections(connections + 1)
+          setStudentList([...studentList, data.name])
           socket.emit("teacher_check_approved", location.state.room)
         }
       })
@@ -186,7 +197,8 @@ const action = (
         }
       })
 
-      socket.emit("join_room", location.state.room)
+      
+
       socket.on("user_connected", () => {
       });
 
@@ -233,7 +245,7 @@ const action = (
 
 
       socket.on("user_disconnected", () => {
-        
+        setConnections(connections - 1)
         console.log(`User Disconnected`)
       })
     }, [navigate, socket, connections]);
@@ -248,6 +260,7 @@ const [data, setData] = useState({})
       setData(response.data)
       setPicture(response.data.pic)
       setFirstName(response.data.first_name)
+      socket.emit("join_room", {room: location.state.room, name: response.data.pic})
       if(response.data.message == "authentication failed"){
         localStorage.removeItem("jwt");
         navigate("/login")
@@ -434,7 +447,7 @@ const [data, setData] = useState({})
  
   return (
       <>
-      <button onClick={() => {getStats(clientState)}}>GET STATS</button>
+      {studentList}
       <div>
       <Snackbar
         open={open}
@@ -482,9 +495,9 @@ const [data, setData] = useState({})
         </div>
         <div id="chat" className="rounded-lg min-w-max shadow-lg max-h-[90vh] min-h-[90vh]">
         <div className="chat h-[100%] bg-white dark:bg-dark-mode-secondary relative noScrollBar">
-            <div className="grid grid-cols-3 items-center">
-            <div className=" col-span-2 mt-6"><h1 className="font-bold text-xl text-gray-400 ml-10">{location.state.title}</h1></div>
-            <div className="text-secondary mx-auto mt-6"><BsFillPlusCircleFill size={50}/></div>
+            <div className="flex flex-row items-center">
+            <div className="mt-6"><h1 className="font-bold text-xl text-gray-400 ml-10">{location.state.title}</h1></div>
+            <div className="text-secondary ml-4 mt-6 w-10 rounded-full flex flex-row">{studentList.map((pics) => <img className="rounded-full mx-1" src={pics}></img>)}</div>
             </div>
             <div className="items-center mt-2">
                 <h2 className="mx-auto text-center font-bold text-secondary mb-2">CHAT</h2>

@@ -176,8 +176,8 @@ const Viewer = () =>{
       }
     })
 
-    socket.on("user_joined_room", (room) => {
-      if(room == location.state.room){
+    socket.on("user_joined_room", (data) => {
+      if(data.room == location.state.room){
         connectToSFU()
       }
     })
@@ -190,7 +190,7 @@ const Viewer = () =>{
     
 
 
-    socket.emit("join_room", location.state.room)
+    
     
       socket.on("receive_message", (data) => {
         setMessageList((list) => [...list, data])
@@ -219,6 +219,7 @@ const [data, setData] = useState({})
       setData(response.data)
       setPicture(response.data.pic)
       setFirstName(response.data.first_name)
+      socket.emit("join_room", {room: location.state.room, name: response.data.pic})
       if(response.data.message == "authentication failed"){
         localStorage.removeItem("jwt");
         navigate("/login")
