@@ -112,6 +112,11 @@ app.get("/api", (req, res) => {
       socket.to(data.room).emit("close_meeting");
       console.log("meeting ended")
     })
+
+    socket.on("ar_coordinates", (data) => {
+      console.log(data)
+      socket.to(data.room).emit("ar_coordinates_recieved", data)
+    })
   });
 
   server.listen(PORT, () => {

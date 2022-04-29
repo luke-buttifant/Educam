@@ -130,10 +130,12 @@ const action = (
     input.current.value = '';
   };
 
-  window.onload = () => {
+
+
+  useEffect(() => {
     userAuthenticated();
     connectToSFU();
-  }
+  }, [])
 
   useEffect(() => {
     socket.emit("teacher_joined", location.state.room)
@@ -147,17 +149,12 @@ const action = (
   }, [hours, minutes, seconds])
 
   useEffect(() => {
-    connectToSFU();
-    userAuthenticated();
 
 
       socket.off().on("receive_message", (data) => {
         setMessageList((list) => [...list, data])
       });
 
-      // socket.on("is_teacher_in_room", (data) => {
-      //   console.log("recieved is teacher in room")
-      //   socket.to(data).emit("teacher_check_passed")})
 
       socket.on("user_joined_room", (data) => {
         if(data.room == location.state.room){
@@ -181,7 +178,6 @@ const action = (
       socket.on("update_user_connections", (data) => {
         console.log(data)
         console.log("update connections")
-        setConnections(connections + 1)
       })
 
       socket.on("user_is_in_room", () => {
@@ -404,9 +400,7 @@ const [data, setData] = useState({})
       detect(model, AR)
       changeState(false);
     }, 1000));
-    console.log(AR)
     setAR(!AR)
-    console.log(AR)
     if(AR){
       clearInterval(intervalState)
     }
@@ -440,20 +434,26 @@ const [data, setData] = useState({})
   
         const prediction = await model.estimateFaces(pubVideo.current, returnTensors)        
         const ctx = canvasRef.current.getContext("2d");
+        if(prediction.length > 0){
+          for (let i = 0; i < prediction.length; i++) {
+            const x = prediction[i].landmarks[0][0]
+            const y =  prediction[i].landmarks[0][1]
+            const start = prediction[i].topLeft;
+            const end = prediction[i].bottomRight;
+            const size = [end[0] - start[0], end[1] - start[1]];
+        
+          socket.emit("ar_coordinates", {x: x, y: y,size: size, room: location.state.room})
+        }
         draw(prediction, ctx)
       }
+        
+      }
     }
-
-  }
-  const getStats = async (client) => {
-    var response = await client.getPubStats()
-    console.log(response)
   }
 
  
   return (
       <>
-      <button onClick={() => {getStats(clientState)}}>CLICK ME</button>
       <div>
       <Snackbar
         open={open}

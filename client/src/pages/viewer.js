@@ -24,6 +24,7 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Button from '@mui/material/Button';
 import * as react from "react"
+import viewerDraw from "../viewerMask"
 
 
 const Viewer = () =>{
@@ -37,6 +38,7 @@ const Viewer = () =>{
   const [faceDetected, setFaceDetected]= useState(false)
   const [open, setOpen] = useState(false);
   const [muted, setMuted] = useState(false);
+  const mainCanvasRef = useRef()
 
   const {
     seconds,
@@ -151,10 +153,7 @@ const Viewer = () =>{
     }
   }, [hours, minutes, seconds])
 
-  window.onload = () => {
-    runFaceDetection();
-    connectToSFU();
-  }
+
 
   if(isRunning && !faceDetected){
     pause();
@@ -164,11 +163,13 @@ const Viewer = () =>{
     start();
   }
 
+useEffect(() => {
+  userAuthenticated();
+  connectToSFU()
+  runFaceDetection();
+}, [])
 
   useEffect(() => {
-    userAuthenticated();
-    connectToSFU();
-    runFaceDetection();
 
     socket.on("teacher_is_in_room", (data) => {
       console.log("teacher is in room")
@@ -178,18 +179,14 @@ const Viewer = () =>{
     })
 
     socket.on("teacher_joined_room", (data) => {
-      console.log("teacher joined room")
-      if(data == location.state.room){
+      connectToSFU()
         setAllowStart(true)
         socket.emit("update_connections", location.state.room)
-      }
     })
 
     socket.on("user_joined_room", (data) => {
       console.log("user joined room")
-      if(data.room == location.state.room){
-        connectToSFU()
-      }
+      
     })
 
     
@@ -197,9 +194,26 @@ const Viewer = () =>{
         setOpen(true)
     }) 
 
-    
-
-
+    socket.on("ar_coordinates_recieved", (data) => {
+      if(
+        typeof subVideo.current !== "undefined" &&
+        subVideo.current !== null
+      ){
+        //Get video properties
+        const videoWidth = subVideo.current.videoWidth;
+        const videoHeight = subVideo.current.videoHeight;
+  
+        //Set video height and width
+        subVideo.current.width = videoWidth;
+        subVideo.current.height = videoHeight;
+  
+        mainCanvasRef.current.width = videoWidth;
+        mainCanvasRef.current.height = videoHeight;
+         
+        const ctx = mainCanvasRef.current.getContext("2d");
+      viewerDraw(data.x, data.y, data.size, ctx)
+      console.log(data)
+    }})
     
     
       socket.on("receive_message", (data) => {
@@ -296,7 +310,11 @@ function end_call(){
     </div>
       <div className="grid grid-cols-3">
       <div className="col-span-2 mt-32 mx-5">
-        <div><video autoPlay={true} id="videoElement" controls ref={subVideo} className='rounded-lg shadow-lg min-w-[100%]'></video>
+        <div>
+        <div className="videoParent">
+            <div><video autoPlay={true} id="videoElement" ref={subVideo} className='rounded-lg shadow-lg min-w-[100%] '></video></div>
+            <div><canvas className=" min-h-[100%] max-w-[100%]" ref={mainCanvasRef}></canvas></div>
+        </div>
         <div className="max-w-[80%] mx-auto">
         <div className="container mt-5 flex flex-row mx-auto">
           <div className={!muted ? "w-20 h-20 bg-gray-300 rounded-full mx-auto hover:opacity-75" : "w-20 h-20 bg-red-300 rounded-full mx-auto hover:opacity-75"} onClick={muteCall}><AiOutlineAudioMuted size={40} className="mx-auto text-center mt-5 p-2"/></div>

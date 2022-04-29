@@ -1,6 +1,7 @@
 
 import Mask from "./images/half-mask-0.png"
 import Glasses from "./images/ar-glasses.webp"
+import { socket } from "./components/socketConnection";
 
 function average(a, b) {
   // force the input as numbers *1
@@ -16,6 +17,7 @@ function drawRotatedImage(ctx, angle){
 
 // Drawing function
 const draw = (predictions, ctx) => {
+  
     var imgObj = new Image();
     imgObj.src = Glasses
 
@@ -27,7 +29,7 @@ const draw = (predictions, ctx) => {
           const rightEyeX = predictions[i].landmarks[1][0]
           const rightEyeY = predictions[i].landmarks[1][1]
           const x = leftEyeX
-          const y = predictions[i].landmarks[1][1];
+          const y = rightEyeY
           const rotation = Math.atan2(rightEyeY - leftEyeY, rightEyeX - leftEyeX )
 
           const start = predictions[i].topLeft;
