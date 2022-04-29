@@ -95,6 +95,13 @@ app.get("/api", (req, res) => {
       socket.to(data).emit("update_user_connections", data)
     })
 
+    socket.on("update_counter", (data) => {
+      socket.to(data).emit("update_user_counter")
+    })
+
+    socket.on("student_is_attending", (data) => {
+      socket.to(data.room).emit("student_confirmed_attendance", data)
+    })
     
     socket.on("send_message", (data) => {
       socket.to(data.room).emit("receive_message", data);

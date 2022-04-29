@@ -145,6 +145,11 @@ const Viewer = () =>{
   let navigate = useNavigate()
   const subVideo = useRef();
   
+  useEffect(() => {
+    if(attending){
+      socket.emit("student_is_attending", {room: location.state.room, name: firstName})
+    }
+  }, [hours, minutes, seconds])
 
   window.onload = () => {
     runFaceDetection();
@@ -166,10 +171,14 @@ const Viewer = () =>{
     runFaceDetection();
 
     socket.on("teacher_is_in_room", (data) => {
+      console.log("teacher is in room")
       setAllowStart(true)
+      // socket.emit("update_counter", location.state.room)
+      socket.emit("update_connections", location.state.room)
     })
 
     socket.on("teacher_joined_room", (data) => {
+      console.log("teacher joined room")
       if(data == location.state.room){
         setAllowStart(true)
         socket.emit("update_connections", location.state.room)
@@ -177,6 +186,7 @@ const Viewer = () =>{
     })
 
     socket.on("user_joined_room", (data) => {
+      console.log("user joined room")
       if(data.room == location.state.room){
         connectToSFU()
       }

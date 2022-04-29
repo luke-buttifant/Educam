@@ -155,9 +155,9 @@ const action = (
         setMessageList((list) => [...list, data])
       });
 
-      socket.on("is_teacher_in_room", (data) => {
-        console.log("recieved is teacher in room")
-        socket.to(data).emit("teacher_check_passed")})
+      // socket.on("is_teacher_in_room", (data) => {
+      //   console.log("recieved is teacher in room")
+      //   socket.to(data).emit("teacher_check_passed")})
 
       socket.on("user_joined_room", (data) => {
         if(data.room == location.state.room){
@@ -173,9 +173,14 @@ const action = (
         setOpen(true)
       })
 
+      socket.on("student_confirmed_attendance", (data) => {
+        console.log(data.name + " is attending")
+      })
 
-      socket.on("update_user_connections", () => {
-        console.log("user is already in room")
+
+      socket.on("update_user_connections", (data) => {
+        console.log(data)
+        console.log("update connections")
         setConnections(connections + 1)
       })
 
@@ -185,6 +190,7 @@ const action = (
       })
       
       socket.on("student_is_in_room", (data) => {
+        console.log("student is in room")
         if(data == location.state.room){
           setConnections(connections + 1)
         }
@@ -439,15 +445,15 @@ const [data, setData] = useState({})
     }
 
   }
-  
-  async function getStats(client){
-    var response = await client.getSubStats()
+  const getStats = async (client) => {
+    var response = await client.getPubStats()
     console.log(response)
   }
+
  
   return (
       <>
-      {studentList}
+      <button onClick={() => {getStats(clientState)}}>CLICK ME</button>
       <div>
       <Snackbar
         open={open}
@@ -507,7 +513,7 @@ const [data, setData] = useState({})
             <div id="chat-room" ref={chatRoom} className="flex flex-col divide-y">
               {messageList.map((messageContent) => {
                 return(
-                  <ChatMessage key={messageContent} dp={messageContent.picture} name={messageContent.firstName} message={messageContent.message} time={messageContent.time} />
+                  <ChatMessage key={messageContent.message} dp={messageContent.picture} name={messageContent.firstName} message={messageContent.message} time={messageContent.time} />
                 )
               })}
             </div>
