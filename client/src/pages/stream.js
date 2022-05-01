@@ -23,7 +23,12 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Button from '@mui/material/Button';
 import * as react from "react"
-import Modal from '@mui/material/Modal';
+import "@tensorflow/tfjs-core";
+import "@tensorflow/tfjs-converter";
+import "@tensorflow/tfjs-backend-webgl";
+import * as faceLandmarksDetection from "@tensorflow-models/face-landmarks-detection";
+import { MediaPipeFaceMesh } from "@tensorflow-models/face-landmarks-detection/dist/types";
+
 
 
 const Stream = () =>{
@@ -46,7 +51,6 @@ const Stream = () =>{
  const [firstName, setFirstName] = useState()
  const [messageList, setMessageList] = useState([]);
  const [userStats, setUserStats] = useState([])
- const blazeface = require('@tensorflow-models/blazeface');
  const [streamObject, setStream] = useState();
  const [muted, setMuted] = useState(false)
  const [intervalState, setIntervalState] = useState()
@@ -403,16 +407,19 @@ const [data, setData] = useState({})
 
   const runFaceDetection = async () =>{
     changeState(true);
-    const model = await blazeface.load()
-    console.log("Blazeface loaded...")
-    setIntervalState(setInterval(() => {
-      detect(model, AR)
-      changeState(false);
-    }, 1000));
-    setAR(!AR)
-    if(AR){
-      clearInterval(intervalState)
+    console.log("tensorflow loading...")
+    const model = faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh;
+    const detectorConfig = {
+    runtime: 'mediapipe', // or 'tfjs'
+    solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh',
     }
+    const detector = await faceLandmarksDetection.createDetector(model, detectorConfig);
+    console.log("tensorflow loaded...")
+    setInterval(() => {
+      detect(detector, AR)
+    }, 100)
+    
+    changeState(false)
   }
   var running = true;
 
@@ -441,19 +448,26 @@ const [data, setData] = useState({})
         canvasRef.current.width = videoWidth;
         canvasRef.current.height = videoHeight;
   
-        const prediction = await model.estimateFaces(pubVideo.current, returnTensors)        
+        const prediction = await model.estimateFaces(pubVideo.current)        
         const ctx = canvasRef.current.getContext("2d");
         if(prediction.length > 0){
-          for (let i = 0; i < prediction.length; i++) {
-            const x = prediction[i].landmarks[0][0]
-            const y =  prediction[i].landmarks[0][1]
-            const start = prediction[i].topLeft;
-            const end = prediction[i].bottomRight;
-            const size = [end[0] - start[0], end[1] - start[1]];
+        //   for (let i = 0; i < prediction.length; i++) {
+        //     const x = prediction[i].landmarks[0][0]
+        //     const y =  prediction[i].landmarks[0][1]
+        //     const start = prediction[i].topLeft;
+        //     const end = prediction[i].bottomRight;
+        //     const size = [end[0] - start[0], end[1] - start[1]];
         
-          socket.emit("ar_coordinates", {x: x, y: y,size: size, room: location.state.room})
-        }
-        draw(prediction, ctx)
+        //   socket.emit("ar_coordinates", {x: x, y: y,size: size, room: location.state.room})
+        // }
+        // draw(prediction, ctx)
+
+          // console.log(prediction)
+          draw(prediction, ctx, videoWidth, videoHeight)
+        // requestAnimationFrame(() => {
+        //   // draw(prediction, ctx, videoWidth, videoHeight)
+        // })
+        console.log(prediction)
       }
         
       }

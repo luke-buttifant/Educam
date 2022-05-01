@@ -1,46 +1,74 @@
+const drawMask = (
+  ctx,
+  keypoints,
+  distance
+) => {
+  const points = [
+    93,
+    132,
+    58,
+    172,
+    136,
+    150,
+    149,
+    176,
+    148,
+    152,
+    377,
+    400,
+    378,
+    379,
+    365,
+    397,
+    288,
+    361,
+    323,
+  ];
 
-import Mask from "./images/half-mask-0.png"
-import Glasses from "./images/ar-glasses.webp"
-import { socket } from "./components/socketConnection";
-
-function average(a, b) {
-  // force the input as numbers *1
-  return ((a*1 + b*1) /2);
-}
-
-function drawRotatedImage(ctx, angle){
- 
-  
-
-  
-}
-
-// Drawing function
-const draw = (predictions, ctx) => {
-  
-    var imgObj = new Image();
-    imgObj.src = Glasses
-
-    if (predictions.length > 0) {
-        
-        for (let i = 0; i < predictions.length; i++) {
-          const leftEyeX = predictions[i].landmarks[0][0]
-          const leftEyeY = predictions[i].landmarks[0][1]
-          const rightEyeX = predictions[i].landmarks[1][0]
-          const rightEyeY = predictions[i].landmarks[1][1]
-          const x = leftEyeX
-          const y = rightEyeY
-          const rotation = Math.atan2(rightEyeY - leftEyeY, rightEyeX - leftEyeX )
-
-          const start = predictions[i].topLeft;
-          const end = predictions[i].bottomRight;
-          const size = [end[0] - start[0], end[1] - start[1]];
-          
-          ctx.drawImage(imgObj, x - 25, y - 10, size[0] - 50, size[1] - 50)
-        }
-      }
-
+  ctx.moveTo(keypoints[195][0], keypoints[195][1]);
+  for (let i = 0; i < points.length; i++) {
+    if (i < points.length / 2) {
+      ctx.lineTo(
+        keypoints[points[i]].x - distance,
+        keypoints[points[i]].y + distance
+      );
+    } else {
+      ctx.lineTo(
+        keypoints[points[i]].x + distance,
+        keypoints[points[i]].y + distance
+      );
+    }
+  }
 };
 
+const draw = (
+  predictions,
+  ctx,
+  width,
+  height
+) => {
+  if (predictions.length > 0) {
+    predictions.forEach((prediction) => {
+      const keypoints = prediction.keypoints;
+      const boundingBox = prediction.box;
+      const bottomRight = [boundingBox.xMax, boundingBox.yMax];
+      const topLeft = [boundingBox.xMin, boundingBox.yMin];
+      // make the drawing mask larger a bit
+      const distance =
+        Math.sqrt(
+          Math.pow(bottomRight[0] - topLeft[0], 2) +
+            Math.pow(topLeft[1] - topLeft[1], 2)
+        ) * 0.02;
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "black";
+      ctx.save();
+      ctx.beginPath();
+      drawMask(ctx, keypoints, distance);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    });
+  }
+};
 
-export default draw
+export default draw;
