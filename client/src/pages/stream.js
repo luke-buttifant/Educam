@@ -168,7 +168,7 @@ const action = (
 
       socket.on("user_joined_room", (data) => {
         console.log(data)
-          connectToSFU()
+          // connectToSFU()
           socket.emit("get_users", location.state.room)
           setStudentList([...studentList, data.name])
           socket.emit("teacher_check_approved", location.state.room)
@@ -316,7 +316,7 @@ const [data, setData] = useState({})
     LocalStream.getUserMedia({
       resolution: 'vga',
       audio: true,
-      codec: "vp8",
+      codec: "vp9",
       simulcast: true
     }).then((media) => {
     setLocalStream(media)
@@ -327,6 +327,7 @@ const [data, setData] = useState({})
     client.publish(media);
     })
   }
+
 
   function endCall(){
     
@@ -505,8 +506,59 @@ const [data, setData] = useState({})
    localStorage.setItem("mask_colour", colour)
  }
 
+ const [camTrack, setCamTrack] = useState()
+ const [shareTrack, setShareTrack] = useState()
+
+ function shareScreen(){
+   if(sharingScreen){
+    LocalStream.getUserMedia({
+      resolution: 'vga',
+      audio: true,
+      codec: "vp9",
+      simulcast: true
+    }).then((media) => {
+    localStream.updateTrack(media.getTracks()[1], shareTrack)
+    pubVideo.current.srcObject = media;
+    pubVideo.current.autoplay = true;
+    pubVideo.current.controls = true;
+    pubVideo.current.muted = true;
+    })
+    setSharingScreen(false)
+   }
+   else{
+    LocalStream.getDisplayMedia({
+      resolution: 'hd',
+      audio: false,
+      codec: "vp9",
+      simulcast: false
+    }).then((media) => {
+    var screenTrack = media.getTracks()
+    var webcamTrack = localStream.getTracks()
+    localStream.updateTrack(screenTrack[0], webcamTrack[1])
+    pubVideo.current.srcObject = media;
+    pubVideo.current.autoplay = true;
+    pubVideo.current.controls = true;
+    pubVideo.current.muted = true;
+    setShareTrack(screenTrack[0])
+    setCamTrack(webcamTrack[1])
+    socket.emit("sharing_screen", location.state.room)
+    setSharingScreen(true)
+    })
+   }
+
+   
+  //  var currentTrack = clientState.getTrack('video')
+  //  clientState.updateTrack()
+  
+  console.log(localStream)
+ }
+
+ function getTracks(){
+   console.log(localStream.getTracks())
+ }
   return (
       <>
+      <button onClick={getTracks}>CLICK ME</button>
       <div>
       <Snackbar
         open={open}
@@ -552,7 +604,7 @@ const [data, setData] = useState({})
         <div className="container mt-5 flex flex-row mx-auto">
           <div className={muted ? "w-20 h-20 rounded-full mx-auto bg-red-500 hover:opacity-75 cursor-pointer" : "w-20 h-20 bg-gray-300 rounded-full mx-auto hover:opacity-75 cursor-pointer"} onClick={controlLocalAudio}><AiOutlineAudioMuted size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-red-400 rounded-full mx-auto cursor-pointer hover:opacity-50" onClick={endCall}><FiPhone size={40} className="mx-auto text-center mt-5 p-2 "/></div>
-             <div className="w-20 h-20 bg-gray-300 rounded-full  mx-auto cursor-pointer"><MdScreenShare size={40} className="mx-auto text-center mt-5 p-2"/></div>
+             <div className="w-20 h-20 bg-gray-300 rounded-full  mx-auto cursor-pointer" onClick={shareScreen}><MdScreenShare size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto"><BsPeopleFill size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto cursor-pointer" onClick={runFaceDetection}>{isLoading ? <RiSurgicalMaskFill color={localStorage.getItem("mask_colour")} size={40} className="mx-auto text-center mt-5 p-2 animate-spin"/> : <RiSurgicalMaskFill color={localStorage.getItem("mask_colour")} size={40} className="mx-auto text-center mt-5 p-2"/> }</div>
 

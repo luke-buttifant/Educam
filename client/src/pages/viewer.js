@@ -180,6 +180,11 @@ useEffect(() => {
       socket.emit("update_connections", location.state.room)
     })
 
+    socket.on("update_tracks", () => {
+      console.log("updating tracks...")
+      connectToSFU();
+    })
+
     socket.on("teacher_joined_room", (data) => {
       connectToSFU()
         setAllowStart(true)
@@ -275,7 +280,7 @@ const [data, setData] = useState({})
     signal.onopen = () => client.join(location.state.room);
     setClientState(client)
     client.ontrack = (track, stream) => {
-        console.log("got track: ", track.id, "for stream: ", stream.id);
+      console.log(track)
         SetGotTrack(true)
         track.onunmute = () => {
           subVideo.current.srcObject = stream;

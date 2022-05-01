@@ -59,6 +59,10 @@ app.get("/api", (req, res) => {
       socket.to(data.room).emit("student_raised_hand", data)
     })
 
+    socket.on("sharing_screen", (data) => {
+      socket.to(data).emit("update_tracks")
+    })
+
 
     socket.on("teacher_joined", (data) => {
       socket.to(data).emit("teacher_joined_room", data)

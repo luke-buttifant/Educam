@@ -1,8 +1,5 @@
-const drawMask = (
-  ctx,
-  keypoints,
-  distance
-) => {
+const drawMask = (ctx, keypoints, distance) => {
+  //Key points from tensorflow map.
   const points = [
     93,
     132,
@@ -41,6 +38,12 @@ const drawMask = (
   }
 };
 
+function calculateDistance(bottomRight, topLeft){
+ return Math.sqrt(
+    Math.pow(bottomRight[0] - topLeft[0], 2) + 
+      Math.pow(topLeft[1] - topLeft[1], 2)) * 0.02;
+}
+
 const draw = (
   predictions,
   ctx,
@@ -54,12 +57,8 @@ const draw = (
       const boundingBox = prediction.box;
       const bottomRight = [boundingBox.xMax, boundingBox.yMax];
       const topLeft = [boundingBox.xMin, boundingBox.yMin];
-      // make the drawing mask larger a bit
-      const distance =
-        Math.sqrt(
-          Math.pow(bottomRight[0] - topLeft[0], 2) +
-            Math.pow(topLeft[1] - topLeft[1], 2)
-        ) * 0.02;
+      const distance = calculateDistance(bottomRight, topLeft)
+
       ctx.clearRect(0, 0, width, height);
       ctx.fillStyle = colour;
       ctx.save();
