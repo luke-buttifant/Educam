@@ -2,11 +2,12 @@ import {React, useState, useEffect, useRef, useReducer} from "react"
 import * as ReactDOM from 'react-dom';
 import "../App.css"
 import VideoFeed from "../components/getVideoFeed";
-import {BsFillPlusCircleFill, BsPersonDashFill, BsPeopleFill} from 'react-icons/bs'
+import {BsPeopleFill} from 'react-icons/bs'
 import {BiSend, BiGlasses} from 'react-icons/bi'
 import {FiPhone} from 'react-icons/fi'
-import {AiOutlineAudioMuted, AiOutlineUserAdd} from 'react-icons/ai'
-import {MdScreenShare, MdSettingsSystemDaydream} from "react-icons/md"
+import {AiOutlineAudioMuted} from 'react-icons/ai'
+import {MdScreenShare} from "react-icons/md"
+import {RiSurgicalMaskFill} from "react-icons/ri"
 import ChatMessage from "../components/chat.js";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -58,6 +59,7 @@ const Stream = () =>{
  const [studentName, setStudentName] = useState()
  const [studentList, setStudentList] = useState([]);
  const [openModal, setOpenModal] = useState(false)
+ const [maskColour, setMaskColour] = useState("black")
 
  var {
   seconds,
@@ -155,6 +157,9 @@ const action = (
 
   useEffect(() => {
 
+    socket.on("connect", () => {
+      socket.emit("get_users", location.state.room)
+    })
 
       socket.off().on("receive_message", (data) => {
         setMessageList((list) => [...list, data])
@@ -406,7 +411,18 @@ const [data, setData] = useState({})
   }
 
   const runFaceDetection = async () =>{
+
     changeState(true);
+    if(AR){
+      clearInterval(intervalState)
+      const ctx = canvasRef.current.getContext("2d");
+      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
+      changeState(false)
+      setAR(!AR)
+      socket.emit("turn_off_ar", location.state.room)
+      return
+    }
+
     console.log("tensorflow loading...")
     const model = faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh;
     const detectorConfig = {
@@ -415,11 +431,13 @@ const [data, setData] = useState({})
     }
     const detector = await faceLandmarksDetection.createDetector(model, detectorConfig);
     console.log("tensorflow loaded...")
-    setInterval(() => {
+    setIntervalState(setInterval(() => {
       detect(detector, AR)
-    }, 100)
-    
+    }, 100))
     changeState(false)
+    
+
+    
   }
   var running = true;
 
@@ -427,12 +445,7 @@ const [data, setData] = useState({})
   
 
   const detect = async (model, AR) => {
-    if(AR){
-      const ctx = canvasRef.current.getContext("2d");
-      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
-      return
-    }
-    else{
+    setAR(!AR)
       if(
         typeof pubVideo.current !== "undefined" &&
         pubVideo.current !== null
@@ -458,29 +471,42 @@ const [data, setData] = useState({})
         //     const end = prediction[i].bottomRight;
         //     const size = [end[0] - start[0], end[1] - start[1]];
         
-        //   socket.emit("ar_coordinates", {x: x, y: y,size: size, room: location.state.room})
+          socket.emit("ar_coordinates", {prediction: prediction, room: location.state.room, colour: localStorage.getItem("mask_colour"), ar: AR})
         // }
-        // draw(prediction, ctx)
-
-          // console.log(prediction)
-          draw(prediction, ctx, videoWidth, videoHeight)
+          draw(prediction, ctx, videoWidth, videoHeight, localStorage.getItem("mask_colour"))
         // requestAnimationFrame(() => {
         //   // draw(prediction, ctx, videoWidth, videoHeight)
         // })
-        console.log(prediction)
+        // console.log(prediction)
       }
         
-      }
     }
   }
+
+  useEffect(() => {
+    
+  }, [])
+
+  useEffect(() => {
+    console.log(maskColour + " has changed")
+    
+  }, [maskColour])
 
  function getRoomUsers(){
    socket.emit("get_users", location.state.room)
  }
 
+ function changeMask(colour, e){
+   var btns = ["redBtn", "greenBtn", "blackBtn", "purpleBtn"]
+   for(let i = 0; i < btns.length; i++){
+     document.getElementById(btns[i]).classList.remove("-translate-y-1")
+   }
+   document.getElementById(e.target.id).classList.add("-translate-y-1")
+   localStorage.setItem("mask_colour", colour)
+ }
+
   return (
       <>
-      <button onClick={getRoomUsers}>CLICK ME</button>
       <div>
       <Snackbar
         open={open}
@@ -507,20 +533,28 @@ const [data, setData] = useState({})
           </div>
           
         </div>
-      <div id="videoDiv" className="col-span-2 mt-32 mx-5">
+      <div id="videoDiv" className="col-span-2 mt-10 mx-5">
         <div>
 
         <div className="videoParent">
             <div><video autoPlay={true} id="videoElement" ref={pubVideo} className='rounded-lg shadow-lg min-w-[100%] '></video></div>
             <div><canvas className=" min-h-[100%] max-w-[100%]" ref={canvasRef}></canvas></div>
         </div>
+
+        {AR ?  <div className="max-w-[60%] mx-auto grid grid-cols-4 gap-2 transition-all duration-150 ease-out scale-100 ">
+        <div onClick={(e) => changeMask("red", e)} id="redBtn" className="rounded-lg shadow-lg cursor-pointer bg-red-400 min-w-[100px] min-h-[20px] hover:animate-pulse"></div>
+        <div onClick={(e) => changeMask("green", e)} id="greenBtn" className="rounded-lg shadow-lg cursor-pointer bg-green-400 hover:animate-pulse"></div>
+        <div onClick={(e) => changeMask("black", e)} id="blackBtn" className="rounded-lg shadow-lg cursor-pointer bg-black hover:animate-pulse"></div>
+        <div onClick={(e) => changeMask("purple", e)} id="purpleBtn" className="rounded-lg shadow-lg cursor-pointer bg-purple-400 hover:animate-pulse"></div>
+        </div> : <div className="max-w-[60%] mx-auto grid grid-cols-4 gap-2 transition-all duration-150 ease-out scale-0"></div>}
+
         <div className="max-w-[80%] mx-auto">
         <div className="container mt-5 flex flex-row mx-auto">
           <div className={muted ? "w-20 h-20 rounded-full mx-auto bg-red-500 hover:opacity-75 cursor-pointer" : "w-20 h-20 bg-gray-300 rounded-full mx-auto hover:opacity-75 cursor-pointer"} onClick={controlLocalAudio}><AiOutlineAudioMuted size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-red-400 rounded-full mx-auto cursor-pointer hover:opacity-50" onClick={endCall}><FiPhone size={40} className="mx-auto text-center mt-5 p-2 "/></div>
              <div className="w-20 h-20 bg-gray-300 rounded-full  mx-auto cursor-pointer"><MdScreenShare size={40} className="mx-auto text-center mt-5 p-2"/></div>
             <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto"><BsPeopleFill size={40} className="mx-auto text-center mt-5 p-2"/></div>
-            <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto text-purple-400 cursor-pointer" onClick={runFaceDetection}>{isLoading ? <BiGlasses size={40} className="mx-auto text-center mt-5 p-2 animate-spin"/> : <BiGlasses size={40} className="mx-auto text-center mt-5 p-2"/> }</div>
+            <div className="w-20 h-20 bg-gray-300 rounded-full mx-auto cursor-pointer" onClick={runFaceDetection}>{isLoading ? <RiSurgicalMaskFill color={localStorage.getItem("mask_colour")} size={40} className="mx-auto text-center mt-5 p-2 animate-spin"/> : <RiSurgicalMaskFill color={localStorage.getItem("mask_colour")} size={40} className="mx-auto text-center mt-5 p-2"/> }</div>
 
         </div>
         </div>
@@ -540,7 +574,7 @@ const [data, setData] = useState({})
             <div id="chat-room" ref={chatRoom} className="flex flex-col divide-y">
               {messageList.map((messageContent) => {
                 return(
-                  <ChatMessage key={messageContent.message} dp={messageContent.picture} name={messageContent.firstName} message={messageContent.message} time={messageContent.time} />
+                  <ChatMessage key={messageContent.message + Math.random() * 9999} dp={messageContent.picture} name={messageContent.firstName} message={messageContent.message} time={messageContent.time} />
                 )
               })}
             </div>

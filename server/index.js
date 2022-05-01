@@ -120,6 +120,10 @@ app.get("/api", (req, res) => {
       socket.to(data.room).emit("ar_coordinates_recieved", data)
     })
 
+    socket.on("turn_off_ar", (data) => {
+      socket.to(data).emit("ar_turned_off")
+    })
+
     
 
     socket.on("get_users", (room) => {

@@ -212,18 +212,18 @@ useEffect(() => {
         mainCanvasRef.current.height = videoHeight;
          
         const ctx = mainCanvasRef.current.getContext("2d");
-      viewerDraw(data.x, data.y, data.size, ctx)
-      console.log(data)
+        viewerDraw(data.prediction, ctx, videoWidth, videoHeight, data.colour)
     }})
     
+    socket.on("ar_turned_off", (data) => {
+      console.log("ar turned off")
+        const ctx = canvasRef.current.getContext("2d");
+        ctx.clearRect(0, 0, mainCanvasRef.current.width, mainCanvasRef.current.height)
+    })
     
       socket.on("receive_message", (data) => {
         setMessageList((list) => [...list, data])
       });
-
-      socket.on("disconnect", () => {
-
-      })
 
 
       socket.on("close_meeting", async () => {
@@ -351,7 +351,7 @@ function end_call(){
               
             {messageList.map((messageContent) => {
                 return(
-                  <ChatMessage key={messageContent} dp={messageContent.picture} name={messageContent.firstName} message={messageContent.message} time={messageContent.time} />
+                  <ChatMessage key={messageContent.message + Math.random() * 9999} dp={messageContent.picture} name={messageContent.firstName} message={messageContent.message} time={messageContent.time} />
                 )
               })}
               

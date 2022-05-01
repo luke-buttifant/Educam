@@ -45,7 +45,8 @@ const draw = (
   predictions,
   ctx,
   width,
-  height
+  height,
+  colour
 ) => {
   if (predictions.length > 0) {
     predictions.forEach((prediction) => {
@@ -60,7 +61,7 @@ const draw = (
             Math.pow(topLeft[1] - topLeft[1], 2)
         ) * 0.02;
       ctx.clearRect(0, 0, width, height);
-      ctx.fillStyle = "black";
+      ctx.fillStyle = colour;
       ctx.save();
       ctx.beginPath();
       drawMask(ctx, keypoints, distance);
