@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const http = require('http');
 const { Server, Socket } = require('socket.io')
+const {userJoin, getRoomUsers, getActiveRooms} = require('./utils/users')
 const cors = require("cors")
 app.use(cors())
 
@@ -68,9 +69,10 @@ app.get("/api", (req, res) => {
     })
 
     socket.on("join_room", (data) => {
-      console.log(data)
+      const users = userJoin(data);
+      // console.log(users)
       socket.join(data.room);
-      socket.to(data.room).emit("user_joined_room", data);
+      socket.to(data.room).emit("user_joined_room", users);
     });
 
     socket.on("leave_room", (data) => {
@@ -116,6 +118,19 @@ app.get("/api", (req, res) => {
     socket.on("ar_coordinates", (data) => {
       console.log(data)
       socket.to(data.room).emit("ar_coordinates_recieved", data)
+    })
+
+    
+
+    socket.on("get_users", (room) => {
+      console.log("get users room: " + room)
+      const roomUsers = getActiveRooms(io)
+      for(let i = 0; i < roomUsers.length; i++){
+        if(roomUsers[i].room === room){
+          socket.emit("user_count", roomUsers[i])
+        }
+      }
+      
     })
   });
 

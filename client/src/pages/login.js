@@ -57,9 +57,9 @@ const Login = () =>{
 
   return (
     <>
-    <div className="grid grid-cols-2">
-
-      <div className="min-w-max min-h-screen">        <LazyLoadImage
+    <h1 className="flex sm:hidden text-center"><b>Warning!</b>Beta version: This website is not optomised for mobile devices. Please use a desktop/laptop</h1>
+    <div className="grid grid-cols-1 sm:grid-cols-2">
+      <div className="min-w-max min-h-screen hidden sm:flex bg-white">        <LazyLoadImage
               alt="Login Illustration"
               height="50px"
               width="50px"

@@ -39,6 +39,7 @@ const Viewer = () =>{
   const [open, setOpen] = useState(false);
   const [muted, setMuted] = useState(false);
   const mainCanvasRef = useRef()
+  const input = useRef();
 
   const {
     seconds,
@@ -137,6 +138,7 @@ const Viewer = () =>{
     const messageData = { message: message, picture: picture, firstName: firstName, time: new Date(Date.now()).getHours() + ":" + new Date(Date.now()).getMinutes(), room: location.state.room}
     socket.emit("send_message", messageData );
     setMessageList((list) => [...list, messageData])
+    input.current.value = '';
   };
 
   function raiseHand() {
@@ -185,8 +187,7 @@ useEffect(() => {
     })
 
     socket.on("user_joined_room", (data) => {
-      console.log("user joined room")
-      
+      console.log(data)
     })
 
     
@@ -219,6 +220,12 @@ useEffect(() => {
       socket.on("receive_message", (data) => {
         setMessageList((list) => [...list, data])
       });
+
+      socket.on("disconnect", () => {
+
+      })
+
+
       socket.on("close_meeting", async () => {
         var user = await axios.get("/api/users/currentUser", {headers: {
           "x-access-token": localStorage.getItem("jwt")
@@ -243,7 +250,7 @@ const [data, setData] = useState({})
       setData(response.data)
       setPicture(response.data.pic)
       setFirstName(response.data.first_name)
-      socket.emit("join_room", {room: location.state.room, name: response.data.pic})
+      socket.emit("join_room", {room: location.state.room, name: response.data.pic, username: response.data.first_name})
       if(response.data.message == "authentication failed"){
         localStorage.removeItem("jwt");
         navigate("/login")
@@ -402,7 +409,7 @@ function end_call(){
         
         <div className="justify-center flex  w-[100%] mx-auto bg-white dark:bg-dark-mode-secondary">
           
-                <input type="text" className="mx-auto min-w-[80%] bg-secondary text-white p-4 rounded-lg m-2" placeholder="Message..." onKeyPress={(event) => {event.key === "Enter" && sendMessage()}} onChange={(event) =>{
+                <input ref={input} type="text" className="mx-auto min-w-[80%] bg-secondary text-white p-4 rounded-lg m-2" placeholder="Message..." onKeyPress={(event) => {event.key === "Enter" && sendMessage()}} onChange={(event) =>{
                   setMessage(event.target.value)
                 }}></input>
                 <button onClick={sendMessage} className="p-2 dark:text-white"><BiSend size={38}/></button>

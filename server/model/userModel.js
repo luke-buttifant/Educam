@@ -57,6 +57,7 @@ const userSchema = mongoose.Schema(
     },
     school: {
       type: String,
+      required: [true, 'Please add a  school'],
   },
     pic: {
       type: String,
@@ -65,6 +66,7 @@ const userSchema = mongoose.Schema(
     dob: {
       type: String,
       required: [true, 'Please add your dob'],
+      required: [true, 'Please add a  date of birth'],
   },
   classrooms: [classroom]
   },

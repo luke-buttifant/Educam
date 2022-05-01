@@ -33,6 +33,7 @@ const Register = () =>{
     const [value, setValue] = useState();
     const [agree, setAgree] = useState(false);
 
+   
     let navigate = useNavigate()
 
     useEffect(() =>{
@@ -55,7 +56,14 @@ const Register = () =>{
         if(password !== repeatPassword){
             setMessage('Passwords do not match!')
         }
+        if(!value){
+            setMessage('Please select a school!')
+        }
+        if(!dobInput){
+            setMessage("Please select a date of birth!")
+        }
         else{
+            try{
             setMessage(null)
             // try{
                 const config = {
@@ -77,29 +85,29 @@ const Register = () =>{
                 setLoading(false)
                 navigate('/')
                 console.log("succesfull registration")
-            // }
-            // catch (error){
-            //     // setError(error.response.data.message)
-            //     setLoading(false)
-            //     console.log("failed")
-            // }
+            }
+            catch (error){
+                setError(error.response.data.message)
+                setLoading(false)
+                console.log("failed")
+            }
 
         }    
     }
     
   return (
       <>
-    <div className="grid grid-cols-2">
-      <div className="min-w-max min-h-screen"><img className="min-w-max min-h-screen flex" src={loginIllustration}></img></div>
+    <div className="grid grid-cols-1 md:grid-cols-2">
+      <div className="min-w-max min-h-screen hidden md:flex"><img className="min-w-max min-h-screen flex" src={loginIllustration}></img></div>
       <div className="text-white font-sans font-bold container bg-white mx-auto text-center">
                 <div className="grid grid-rows-6 items-center mx-auto text-center mt-20">
                 
-                    <div className="row-span-4 row-start-1 col-auto text-black mx-auto min-w-max">
+                    <div className="row-span-4 row-start-1 text-black mx-auto ">
                         <div className="flex"><h1 className="text-2xl lg:text-3xl pr-2 pt-2">Welcome to</h1><h1 className="text-3xl lg:text-3xl bg-secondary p-2 rounded-lg text-white">Educam.</h1></div>
                         <h2 className="text-xl float-left text-gray-500">Register an account</h2>
                         <form onSubmit={submitHandler}>
                         <div className="pt-10 pr-20 mx-auto">   
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                 <div>
                             <input
                                 type="text" 
@@ -107,7 +115,7 @@ const Register = () =>{
                                 value={first_name}
                                 placeholder="First name..." 
                                 onChange={(e) => setFirstName(e.target.value)}
-                                className="w-full py-3 px-3 border hover:border-gray-700 shadow-lg rounded-md text-base border-gray-400"/>     
+                                className="w-[70%] md:w-full py-3 px-3 border hover:border-gray-700 shadow-lg rounded-md text-base border-gray-400"/>     
                                 </div>
                                 <div>
                             <input 
@@ -116,7 +124,7 @@ const Register = () =>{
                                 value={last_name}
                                 onChange={(e) => setLastName(e.target.value)}
                                 placeholder="Last name..." 
-                                className="w-full py-3 px-3 border hover:border-gray-700 shadow-lg rounded-md text-base border-gray-400"/>     
+                                className="w-[70%] md:w-full py-3 px-3 border hover:border-gray-700 shadow-lg rounded-md text-base border-gray-400"/>     
                                 </div>
                             <div>
                         </div>
@@ -129,7 +137,7 @@ const Register = () =>{
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="Email..." 
-                                className="w-full py-3 px-3 border hover:border-gray-700 border-gray-400  shadow-lg rounded-md text-base "/>                            
+                                className="w-[70%] md:w-full py-3 px-3 border hover:border-gray-700 border-gray-400  shadow-lg rounded-md text-base "/>                            
                         </div>
                     <div className="pt-2 pr-20">
                         <input 
@@ -138,19 +146,19 @@ const Register = () =>{
                             value={password}
                             placeholder="Password..." 
                             onChange={(e) => setPassword(e.target.value)}
-                            className=" w-full py-3 px-3 border hover:border-gray-700 border-gray-400 shadow-lg rounded-md text-base"/>
+                            className=" w-[70%] md:w-full py-3 px-3 border hover:border-gray-700 border-gray-400 shadow-lg rounded-md text-base"/>
                     </div>
-                    <div className="pt-2 pr-20">
+                    {/* <div className="pt-2 pr-20">
                         <input 
                             type="password" 
                             name="repeatPassword" 
                             value={repeatPassword}
                             onChange={(e) => setRepeatPassword(e.target.value)}
                             placeholder="Repeat password..." 
-                            className=" w-full py-3 px-3 border hover:border-gray-700 border-gray-400 shadow-lg rounded-md text-base "/>
-                    </div>
+                            className="w-[70%] md:w-full py-3 px-3 border hover:border-gray-700 border-gray-400 shadow-lg rounded-md text-base "/>
+                    </div> */}
 
-                    <div className="pt-2 pr-20">
+                    <div className="pt-2 pr-20 w-[70%] md:w-full">
                     <Autocomplete
         value={value}
         onChange={(event, school) => {
@@ -162,7 +170,7 @@ const Register = () =>{
         renderInput={(params) => <TextField {...params} label="Please choose a school..." />}
       />
                     </div>
-                    <div className="pt-2 mr-20">
+                    <div className="pt-2 mr-20 w-[60%] md:w-full mx-auto">
                     <LocalizationProvider dateAdapter={AdapterDateFns} className="bg-white">
   <DatePicker
   className="bg-white"

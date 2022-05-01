@@ -135,6 +135,7 @@ const action = (
   useEffect(() => {
     userAuthenticated();
     connectToSFU();
+    socket.emit("get_users", location.state.room)
   }, [])
 
   useEffect(() => {
@@ -157,12 +158,15 @@ const action = (
 
 
       socket.on("user_joined_room", (data) => {
-        if(data.room == location.state.room){
+        console.log(data)
           connectToSFU()
-          setConnections(connections + 1)
+          socket.emit("get_users", location.state.room)
           setStudentList([...studentList, data.name])
           socket.emit("teacher_check_approved", location.state.room)
-        }
+      })
+
+      socket.on("user_count", (data) => {
+        console.log(data)
       })
 
       socket.on("student_raised_hand", (data) => {
@@ -182,30 +186,35 @@ const action = (
 
       socket.on("user_is_in_room", () => {
         console.log("user in room")
-        setConnections(connections + 1)
+        socket.emit("get_users", location.state.room)
       })
       
       socket.on("student_is_in_room", (data) => {
         console.log("student is in room")
         if(data == location.state.room){
-          setConnections(connections + 1)
+          socket.emit("get_users", location.state.room)
         }
+      })
+
+      socket.on("user_list", (data) => {
+        console.log(data)
       })
 
       socket.on("update_user_connection", (data) => {
         console.log("user is already in room")
         if(data == location.state.room){
-          setConnections(connections + 1)
+          socket.emit("get_users", location.state.room)
         }
       })
 
-      
+      socket.on("user_count", (data) => {
+        console.log(data)
+        setConnections(data.size)
+      })
 
-      socket.on("user_connected", () => {
-      });
 
       socket.on("user_left", (room) => {
-        setConnections(connections - 1)
+        socket.emit("get_users", location.state.room)
       })
 
       
@@ -247,7 +256,7 @@ const action = (
 
 
       socket.on("user_disconnected", () => {
-        setConnections(connections - 1)
+        socket.emit("get_users", location.state.room)
         console.log(`User Disconnected`)
       })
     }, [navigate, socket, connections]);
@@ -262,7 +271,7 @@ const [data, setData] = useState({})
       setData(response.data)
       setPicture(response.data.pic)
       setFirstName(response.data.first_name)
-      socket.emit("join_room", {room: location.state.room, name: response.data.pic})
+      socket.emit("join_room", {room: location.state.room, name: response.data.pic, username: response.data.first_name})
       if(response.data.message == "authentication failed"){
         localStorage.removeItem("jwt");
         navigate("/login")
@@ -451,9 +460,13 @@ const [data, setData] = useState({})
     }
   }
 
- 
+ function getRoomUsers(){
+   socket.emit("get_users", location.state.room)
+ }
+
   return (
       <>
+      <button onClick={getRoomUsers}>CLICK ME</button>
       <div>
       <Snackbar
         open={open}
