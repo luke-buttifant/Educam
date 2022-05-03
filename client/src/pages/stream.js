@@ -546,9 +546,6 @@ const [data, setData] = useState({})
     })
    }
 
-   
-  //  var currentTrack = clientState.getTrack('video')
-  //  clientState.updateTrack()
   
   console.log(localStream)
  }

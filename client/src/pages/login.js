@@ -39,16 +39,13 @@ const Login = () =>{
                 }
             }
             setLoading(true)
-            const {data} = await axios.post('api/users/login',{
+            const data = await axios.post('api/users/login',{
                 email, password
             }, config).then((response) => {
                 localStorage.setItem('jwt', response.data.token);
-                navigate("/login")
+                navigate("/permissions")
                 setLoading(false)
             })
-
-            console.log(data)
-
         }catch(error){
             setError(error.response.data.message);
             setLoading(false)

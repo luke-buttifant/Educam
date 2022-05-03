@@ -159,7 +159,8 @@ const Register = () =>{
                     </div> */}
 
                     <div className="pt-2 pr-20 w-[70%] md:w-full">
-                    <Autocomplete
+                        
+    <Autocomplete
         value={value}
         onChange={(event, school) => {
           setValue(school);
@@ -169,6 +170,7 @@ const Register = () =>{
         sx={{ width: 425 }}
         renderInput={(params) => <TextField {...params} label="Please choose a school..." />}
       />
+
                     </div>
                     <div className="pt-2 mr-20 w-[60%] md:w-full mx-auto">
                     <LocalizationProvider dateAdapter={AdapterDateFns} className="bg-white">
