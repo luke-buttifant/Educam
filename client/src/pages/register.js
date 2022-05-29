@@ -32,6 +32,7 @@ const Register = () =>{
     const [message, setMessage] = useState(null)
     const [value, setValue] = useState();
     const [agree, setAgree] = useState(false);
+    const [occupation, setOccupation] = useState(false);
 
    
     let navigate = useNavigate()
@@ -49,6 +50,11 @@ const Register = () =>{
   }
 
     const submitHandler = async (e) => {
+        var is_teacher = false;
+        if(occupation === "teacher"){
+            is_teacher = true;
+        }
+        
         e.preventDefault();
         const school = value;
 
@@ -75,7 +81,7 @@ const Register = () =>{
                 const dob = moment(dobInput).format("DD/MM/YYYY").toString();
                 const {data} = await axios.post(
                     "/api/users",
-                    {first_name, last_name, email, password, gender, dob, school}
+                    {first_name, last_name, email, password, gender, dob, school, is_teacher}
                 ).then((response) => {
                     localStorage.setItem('jwt', response.data.token);
                     navigate("/login")
@@ -97,8 +103,7 @@ const Register = () =>{
     
   return (
       <>
-    <div className="grid grid-cols-1 md:grid-cols-2">
-      <div className="min-w-max min-h-screen hidden md:flex"><img className="min-w-max min-h-screen flex" src={loginIllustration}></img></div>
+    <div className="grid grid-cols-1">
       <div className="text-white font-sans font-bold container bg-white mx-auto text-center">
                 <div className="grid grid-rows-6 items-center mx-auto text-center mt-20">
                 
@@ -107,7 +112,7 @@ const Register = () =>{
                         <h2 className="text-xl float-left text-gray-500">Register an account</h2>
                         <form onSubmit={submitHandler}>
                         <div className="pt-10 pr-20 mx-auto">   
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                 <div>
                             <input
                                 type="text" 
@@ -115,7 +120,7 @@ const Register = () =>{
                                 value={first_name}
                                 placeholder="First name..." 
                                 onChange={(e) => setFirstName(e.target.value)}
-                                className="w-[70%] md:w-full py-3 px-3 border hover:border-gray-700 shadow-lg rounded-md text-base border-gray-400"/>     
+                                className="w-[70%] sm:w-full py-3 px-3 border hover:border-gray-700 shadow-lg rounded-md text-base border-gray-400"/>     
                                 </div>
                                 <div>
                             <input 
@@ -124,7 +129,7 @@ const Register = () =>{
                                 value={last_name}
                                 onChange={(e) => setLastName(e.target.value)}
                                 placeholder="Last name..." 
-                                className="w-[70%] md:w-full py-3 px-3 border hover:border-gray-700 shadow-lg rounded-md text-base border-gray-400"/>     
+                                className="w-[70%] sm:w-full py-3 px-3 border hover:border-gray-700 shadow-lg rounded-md text-base border-gray-400"/>     
                                 </div>
                             <div>
                         </div>
@@ -137,7 +142,7 @@ const Register = () =>{
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="Email..." 
-                                className="w-[70%] md:w-full py-3 px-3 border hover:border-gray-700 border-gray-400  shadow-lg rounded-md text-base "/>                            
+                                className="w-[70%] sm:w-full py-3 px-3 border hover:border-gray-700 border-gray-400  shadow-lg rounded-md text-base "/>                            
                         </div>
                     <div className="pt-2 pr-20">
                         <input 
@@ -146,46 +151,40 @@ const Register = () =>{
                             value={password}
                             placeholder="Password..." 
                             onChange={(e) => setPassword(e.target.value)}
-                            className=" w-[70%] md:w-full py-3 px-3 border hover:border-gray-700 border-gray-400 shadow-lg rounded-md text-base"/>
+                            className=" w-[70%] sm:w-full py-3 px-3 border hover:border-gray-700 border-gray-400 shadow-lg rounded-md text-base"/>
                     </div>
-                    {/* <div className="pt-2 pr-20">
-                        <input 
-                            type="password" 
-                            name="repeatPassword" 
-                            value={repeatPassword}
-                            onChange={(e) => setRepeatPassword(e.target.value)}
-                            placeholder="Repeat password..." 
-                            className="w-[70%] md:w-full py-3 px-3 border hover:border-gray-700 border-gray-400 shadow-lg rounded-md text-base "/>
-                    </div> */}
 
-                    <div className="pt-2 pr-20 w-[70%] md:w-full">
+                    <div className="pt-2 pr-20 max-w-[75%] sm:min-w-[100%] mx-auto">
                         
-    <Autocomplete
-        value={value}
-        onChange={(event, school) => {
-          setValue(school);
-        }}
-        id="schoolPicker"
-        options={schools}
-        sx={{ width: 425 }}
-        renderInput={(params) => <TextField {...params} label="Please choose a school..." />}
-      />
+                    <Autocomplete
+                        value={value}
+                        onChange={(event, school) => {
+                        setValue(school);
+                        }}
+                        id="schoolPicker"
+                        options={schools}
+                        sx={{ width: '100%' }}
+                        renderInput={(params) => 
+                        <TextField {...params} fullWidth label="Please choose a school..." />}
+                    />
 
                     </div>
-                    <div className="pt-2 mr-20 w-[60%] md:w-full mx-auto">
+                    <div className="pt-2 pr-20 max-w-[75%] sm:min-w-[100%] mx-auto">
+
                     <LocalizationProvider dateAdapter={AdapterDateFns} className="bg-white">
-  <DatePicker
-  className="bg-white"
-    label="Date of birth"
-    value={dobInput || null}
-    format="DD-MM-YYYY"
-    onChange={(dobInput) => {
-      setDob(dobInput);
-    }}
-    renderInput={(params) => <TextField {...params} fullWidth className="bg-white" />}
-    showTodayButton={true}
-  />
-</LocalizationProvider>
+                                <DatePicker
+                                className="bg-white"
+                                    label="Date of birth"
+                                    value={dobInput || null}
+                                    format="DD-MM-YYYY"
+                                    onChange={(dobInput) => {
+                                    setDob(dobInput);
+                                    }}
+                                    renderInput={(params) => <TextField {...params} fullWidth className="bg-white" />}
+                                    showTodayButton={true}
+                                />
+                    </LocalizationProvider>
+
                     </div>
                     <div className="pt-2 pr-20">
                     <FormControl>
@@ -193,7 +192,6 @@ const Register = () =>{
       <RadioGroup
       row
         aria-labelledby="demo-radio-buttons-group-label"
-        defaultValue="female"
         name="radio-buttons-group"
         onChange={(e) => setGender(e.target.value)}
       >
@@ -202,6 +200,21 @@ const Register = () =>{
         <FormControlLabel value="other" control={<Radio />} label="Other" />
       </RadioGroup>
     </FormControl>
+    <div>
+    <FormControl>
+      <FormLabel id="demo-radio-buttons-group-label">Occupation</FormLabel>
+      <RadioGroup
+      row
+        aria-labelledby="demo-radio-buttons-group-label"
+        defaultValue="female"
+        name="radio-buttons-group"
+        onChange={(e) => setOccupation(e.target.value)}
+      >
+        <FormControlLabel value="student" control={<Radio />} label="Student" />
+        <FormControlLabel value="teacher" control={<Radio />} label="Lecturer" />
+      </RadioGroup>
+    </FormControl>
+    </div>
                     </div>
                     <div className="text-sm font-sans font-medium w-full pr-20 pt-5 text-center">
                     {error &&<ErrorMessage>{error}</ErrorMessage>}

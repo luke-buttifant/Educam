@@ -15,7 +15,7 @@ const getUsers = async (req, res) => {
 }
 
 const registerUser = asyncHandler(async (req, res) => {
-    const {first_name, last_name, email, password, gender, dob, school} = req.body;
+    const {first_name, last_name, email, password, gender, dob, school, is_teacher} = req.body;
 
     const userExists = await User.findOne({email});
 
@@ -25,7 +25,7 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error('User already exists with that email.')
     }
 
-    const user = await User.create({first_name, last_name, email, password, gender, dob, school});
+    const user = await User.create({first_name, last_name, email, password, gender, dob, school, is_teacher});
 
     if(user){
         const token = generateToken(user._id);

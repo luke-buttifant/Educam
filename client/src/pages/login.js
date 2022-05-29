@@ -55,14 +55,7 @@ const Login = () =>{
   return (
     <>
     <h1 className="flex sm:hidden text-center"><b>Warning!</b>Beta version: This website is not optomised for mobile devices. Please use a desktop/laptop</h1>
-    <div className="grid grid-cols-1 sm:grid-cols-2">
-      <div className="min-w-max min-h-screen hidden sm:flex bg-white">        <LazyLoadImage
-              alt="Login Illustration"
-              height="50px"
-              width="50px"
-              className='min-w-max min-h-screen flex'
-              src={loginIllustration}
-              /></div>
+    <div className="grid grid-cols-1">
       <div className="text-white font-sans font-bold container bg-white mx-auto text-center">
                 <div className="grid grid-rows-6 min-h-screen items-center mx-auto text-center">
                 
