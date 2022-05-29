@@ -1,6 +1,6 @@
 import { CgProfile } from 'react-icons/cg'
 import { BsCalendarCheck, BsInfoCircle } from 'react-icons/bs'
-import { MdOutlineNavigateBefore, MdOutlineNavigateNext, MdOutlineSpaceDashboard } from 'react-icons/md'
+import { MdNavigateBefore, MdOutlineNavigateBefore, MdOutlineNavigateNext, MdOutlineSpaceDashboard } from 'react-icons/md'
 import { AiOutlineInfoCircle, AiOutlineSetting } from 'react-icons/ai'
 import { GoSignOut } from 'react-icons/go'
 import Logo from '../images/Logo.webp'
@@ -49,7 +49,31 @@ const [data, setData] = useState({first_name: "Loading..."})
   
   return(
   <>
-  <div id="topNav" className="float-left top-0 left-0 h-screen m-5 shadow-2xl flex justify-center min-h-screen hidden">
+  <section id="bottom-navigation" className="block fixed inset-x-0 bottom-0 z-10 bg-white shadow">
+		<div id="tabs" className="flex justify-between">
+			<a href="/permissions" className="w-full focus:text-primary hover:text-primary justify-center inline-block text-center pt-2 pb-1">
+      <MdOutlineSpaceDashboard size={30} className="inline-block mb-1" />
+				<span className="tab tab-home block text-xs">Home</span>
+			</a>
+			<a href="/profile" className="w-full focus:text-primary hover:text-primary justify-center inline-block text-center pt-2 pb-1">
+      <CgProfile size={30} className="inline-block mb-1" />
+				<span className="tab tab-kategori block text-xs">Profile</span>
+			</a>
+			<a href="/calendar" className="w-full focus:text-primary hover:text-primary justify-center inline-block text-center pt-2 pb-1">
+      <BsCalendarCheck size={30} className="inline-block mb-1" />
+				<span className="tab tab-explore block text-xs">Calendar</span>
+			</a>
+			<a href="#" className="w-full focus:text-primary hover:text-primary justify-center inline-block text-center pt-2 pb-1">
+      <AiOutlineInfoCircle size={30} className="inline-block mb-1" />
+				<span className="tab tab-whishlist block text-xs">About</span>
+			</a>
+			<a href="#" className="w-full focus:text-primary hover:text-primary justify-center inline-block text-center pt-2 pb-1">
+      <GoSignOut size={30} className="inline-block mb-1" />
+				<span className="tab tab-account block text-xs">Log Out</span>
+			</a>
+		</div>
+	</section>
+  {/* <div id="topNav" className="float-left top-0 left-0 h-screen m-5 shadow-2xl flex justify-center min-h-screen hidden">
     <div className="w-64 bg-white dark:bg-dark-mode rounded-md">
       <div className="px-6 pt-8">
         <div className="flex items-center justify-between">
@@ -135,21 +159,21 @@ const [data, setData] = useState({first_name: "Loading..."})
               width="50px"
               className='rounded-full mt-1'
               src={data.pic}
-              /> : ""}
+              /> : ""} */}
               {/* <img
                 className="rounded-full w-14 h-14"
                 src={data.pic}
                 alt=""
               /> */}
-            </div>
+            {/* </div>
             <div className="flex flex-col pl-3">
               <div className="text-sm text-gray-50">{data.first_name ? data.first_name : "Loading..."}</div>
               <span className="text-sm text-gray-200 font-light tracking-tight">
                {data.school}
                </span>
             </div>
-          </div>
-       </div>
+          </div> */}
+       {/* </div>
       <div className="px-6 pt-4 pb-8">
         <ul>
           <li className="relative text-primary dark:text-white hover:text-white focus-within:text-white">
@@ -170,17 +194,17 @@ const [data, setData] = useState({first_name: "Loading..."})
               <GoSignOut size={30} className="ml-2"/></div>
             <div className="inline-block w-full py-2 pl-14 text-m rounded hover:bg-secondary focus:outline-none focus:ring-1 focus:ring-gray-500 focus:bg-secondary focus:text-white">Sign Out</div>
           </li></button>
-        </ul>
+        </ul> */}
         {/* DARK MODE TOGGLE */}
-        <Toggle />
+        {/* <Toggle /> */}
 
-      </div>
+      {/* </div>
     </div>
-  </div>
+  </div> */}
 
 
   {/* IN NAV */}
-  <div id="bottomNav" className="float-left top-0 left-0 h-screen m-5 shadow-2xl flex justify-center min-h-screen  ">
+  {/* <div id="bottomNav" className="float-left top-0 left-0 h-screen m-5 shadow-2xl flex justify-center min-h-screen  ">
     <div className="w-24 bg-white dark:bg-dark-mode rounded-tl-lg rounded-bl-lg shadow">
 
 
@@ -262,7 +286,7 @@ const [data, setData] = useState({first_name: "Loading..."})
       </div>
 
     </div>
-  </div>
+  </div> */}
 </>
 
   )

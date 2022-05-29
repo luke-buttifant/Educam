@@ -549,13 +549,8 @@ const [data, setData] = useState({})
   
   console.log(localStream)
  }
-
- function getTracks(){
-   console.log(localStream.getTracks())
- }
   return (
       <>
-      <button onClick={getTracks}>CLICK ME</button>
       <div>
       <Snackbar
         open={open}
@@ -610,7 +605,7 @@ const [data, setData] = useState({})
         </div>
         </div>
         <div id="chat" className="rounded-lg min-w-max shadow-lg max-h-[90vh] min-h-[90vh]">
-        <div className="chat h-[100%] bg-white dark:bg-dark-mode-secondary relative noScrollBar">
+        <div className="chat h-[85%] bg-white dark:bg-dark-mode-secondary relative noScrollBar">
             <div className="flex flex-row items-center">
             <div className="mt-6"><h1 className="font-bold text-xl text-gray-400 ml-10">{location.state.title}</h1></div>
             <div className="text-secondary ml-4 mt-6 w-10 rounded-full flex flex-row">{studentList.map((pics) => <img className="rounded-full mx-1" src={pics}></img>)}</div>

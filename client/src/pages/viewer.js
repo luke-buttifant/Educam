@@ -340,7 +340,7 @@ function end_call(){
         </div>
         </div>
         <div className="rounded-lg min-w-max shadow-lg max-h-[90vh] min-h-[90vh]">
-        <div className="chat min-h-[80vh] max-h-[80vh] bg-white dark:bg-dark-mode-secondary relative noScrollBar">
+        <div className="chat h-[85%] bg-white dark:bg-dark-mode-secondary relative noScrollBar">
             <div className="grid grid-cols-3 items-center">
             <div className=" col-span-2 mt-10"><h1 className="font-bold text-xl text-gray-400 ml-10">{location.state.title}</h1></div>
             <div className="text-secondary mx-auto mt-10"><BsFillPlusCircleFill size={50}/></div>
@@ -351,7 +351,7 @@ function end_call(){
                 <div className="w-full border-t border-4 border-secondary"></div>
             </div>
             <ScrollToBottom className="message-container">
-            <div className="max-h-[60vh] min-h-[60vh] overflow-auto noScrollBar message-container">
+            <div className="max-h-[80%] min-h-[60vh] overflow-auto noScrollBar message-container">
             <div className="flex flex-col divide-y ">
               
             {messageList.map((messageContent) => {
